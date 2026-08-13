@@ -1,0 +1,18 @@
+{
+  "explorer.compactFolders": false,
+  "workbench.editor.enablePreview": false,
+  "files.exclude": {
+    "**/.vscode": true,
+    "**/.DS_Store": true,
+    "**/*.md": true,
+    "**/.terraform": true,
+    "**/terraform.tfstate": true,
+    "**/terraform.tfstate.*": true,
+    "**/terraform.tfvars": true,
+    "**/.vault_pass": true,
+    "**/.env": true,
+    "**/inventory.ini.generated": true,
+    "**/zhurnal.txt": true,
+    "**/svodka.txt": true
+  }
+}

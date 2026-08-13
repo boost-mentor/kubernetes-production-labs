@@ -1,0 +1,27 @@
+# Production-pattern: remote state в отдельном приватном Object Storage bucket.
+# Файл — только пример. Перед использованием:
+#   1) создай bucket с versioning, encryption и запретом public access;
+#   2) выдай сервисному аккаунту минимальные права;
+#   3) передай access/secret keys через окружение или CI secret variables;
+#   4) скопируй в backend.tf и выполни terraform init -migrate-state.
+#
+# Никогда не коммить ключи и не используй один state для разных окружений.
+terraform {
+  backend "s3" {
+    endpoints = {
+      s3 = "https://storage.yandexcloud.net"
+    }
+
+    bucket = "REPLACE_WITH_PRIVATE_STATE_BUCKET"
+    key    = "video2/dev/terraform.tfstate"
+    region = "ru-central1"
+
+    use_lockfile = true
+    encrypt      = true
+
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+  }
+}

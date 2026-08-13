@@ -1,0 +1,72 @@
+# ХЕЛЛО-ПЛЕЙБУК «ДИСПЕТЧЕРСКАЯ NIGHT SHIFT» — анатомия + идемпотентность + handlers.
+#
+# ЗАПУСК (в кадре):
+#   rm -rf /tmp/night_office                          # старт с чистого листа, иначе changed=0
+#   ansible -i inventory.ini all -m ping              # → pong
+#   ansible-playbook -i inventory.ini playbook.yml    # → ok=6 changed=4, handler СРАБОТАЛ
+#   ansible-playbook -i inventory.ini playbook.yml    # → ok=5 changed=0, handler МОЛЧИТ
+#   sed -i '' 's/: 4000/: 6000/' vars/prices.yml      # подняли тариф на вой в вентиляции
+#   ansible-playbook -i inventory.ini playbook.yml    # → ok=6 changed=2, handler СНОВА сработал
+#
+# Ни одной задаче не нужен become/sudo — всё пишем в /tmp.
+- name: Диспетчерская NIGHT SHIFT заступает на смену
+  hosts: night_office
+  gather_facts: false
+
+  vars:
+    office: /tmp/night_office
+  vars_files:
+    - vars/prices.yml # прайс на выезды — обычные переменные
+
+  tasks:
+    # 1. Помещение. state: directory — это СОСТОЯНИЕ, а не команда mkdir.
+    - name: Диспетчерская открыта
+      ansible.builtin.file:
+        path: "{{ office }}"
+        state: directory
+        mode: "0755" # строкой: без ведущего нуля (mode: 755) права уедут в мусор
+
+    # 2. Вывеска. Второй запуск её не тронет — она уже ровно такая.
+    - name: Вывеска висит
+      ansible.builtin.copy:
+        dest: "{{ office }}/vyveska.txt"
+        mode: "0644"
+        content: |
+          NIGHT SHIFT · ночная аварийная служба
+          Заявки принимаем круглосуточно, выезжаем по темноте.
+          Если оно урчит — это котёл. Если урчит и зовёт по имени — это к нам.
+          Кофе за счёт заведения. Пицца — дежурным.
+
+    # 3. ⭐ HANDLERS ЖИВЬЁМ: поменялся прайс → notify → рассылка РОВНО ОДИН РАЗ.
+    - name: Прайс на выезды вывешен
+      ansible.builtin.copy:
+        dest: "{{ office }}/prays.txt"
+        mode: "0644"
+        content: |
+          NIGHT SHIFT · ПРАЙС НА НОЧНЫЕ ВЫЗОВЫ
+          {% for call, price in call_prices.items() %}
+          {{ "%-32s" | format(call) }} {{ price }} ₽
+          {% endfor %}
+          После 02:00 тариф двойной. Это не жадность, это биология.
+      notify: Разослать дежурным новый тариф # ← только если файл РЕАЛЬНО изменился
+
+    # 4. Листинг: команда мир не меняет — говорим это Ansible явно.
+    - name: Посмотреть, что в диспетчерской
+      ansible.builtin.command: "ls -1 {{ office }}"
+      register: listing
+      changed_when: false
+
+    - name: Показать листинг
+      ansible.builtin.debug:
+        msg: "{{ listing.stdout_lines }}"
+
+  handlers:
+    # Хендлер выполняется ОДИН раз в конце play, даже если notify пришёл десять раз.
+    # В бою здесь «systemctl restart nginx»: конфиг поменяли — рестарт один.
+    - name: Разослать дежурным новый тариф
+      ansible.builtin.copy:
+        dest: "{{ office }}/rassylka.txt"
+        mode: "0644"
+        content: |
+          Тариф обновлён, дежурные оповещены.
+          Полный набор нечисти по прайсу: {{ call_prices.values() | list | sum }} ₽.

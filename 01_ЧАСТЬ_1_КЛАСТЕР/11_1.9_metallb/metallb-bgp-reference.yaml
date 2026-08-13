@@ -1,0 +1,23 @@
+# REFERENCE ONLY: не применять без реального BGP-router и согласованных ASN/IP.
+# Для новых инсталляций MetalLB рекомендует FRR-K8s backend. Эти CRD описывают
+# соседство и анонс; сам router должен принять маршрут и настроить ECMP/BFD.
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: edge-router
+  namespace: metallb-system
+spec:
+  myASN: 64510
+  peerASN: 64500
+  peerAddress: 192.0.2.1
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: video2-bgp
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - video2-pool
+  aggregationLength: 32
+  localPref: 100

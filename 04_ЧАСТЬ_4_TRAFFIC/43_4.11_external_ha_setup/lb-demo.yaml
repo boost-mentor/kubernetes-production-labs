@@ -1,0 +1,21 @@
+# This manifest intentionally exposes the same Night Shift application used
+# throughout parts 2-4. It does not smuggle a second nginx demo into the story.
+# Apply manifests/08_tcp_osi/night_shift.yaml first and wait for its rollout.
+apiVersion: v1
+kind: Service
+metadata:
+  name: night-shift-ha-nodeport
+  namespace: traffic-lab
+  labels:
+    app.kubernetes.io/name: night-shift
+    app.kubernetes.io/component: external-entry
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app: night-shift
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080

@@ -1,0 +1,81 @@
+# ХЕЛЛО-ANSIBLE НА ЖИВОЙ ВМ: настроить машину, созданную Terraform.
+# «Terraform создал VM — Ansible установил runtime и запустил наш образ».
+#
+# ЗАПУСК (в кадре; IP — из terraform output vm_ip):
+#   echo "[demo_vm]" > vm_inventory.ini
+#   echo "<IP> ansible_user=root" >> vm_inventory.ini
+#   ansible -i vm_inventory.ini all -m ping                 # pong с ЖИВОЙ машины
+#   ansible-playbook -i vm_inventory.ini site_vm.yml        # runtime + systemd unit
+#   open http://<IP>/                                       # реальная NIGHT SHIFT UI
+#   ansible-playbook -i vm_inventory.ini site_vm.yml        # changed=0 — идемпотентность
+- name: Настроить свежую ВМ
+  hosts: demo_vm
+  become: true
+  vars:
+    night_shift_image: ghcr.io/boost-mentor/night-shift:2.0.0
+  tasks:
+    - name: Имя машины — говорящее
+      ansible.builtin.hostname:
+        name: hello-ansible-vm
+
+    - name: Docker runtime установлен
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - curl
+        state: present
+        update_cache: true
+
+    - name: NIGHT SHIFT управляется systemd, а не ручным docker run
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/night-shift.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=NIGHT SHIFT demo API
+          Wants=network-online.target docker.service
+          After=network-online.target docker.service
+
+          [Service]
+          Restart=always
+          RestartSec=3
+          ExecStartPre=-/usr/bin/docker rm -f night-shift
+          ExecStartPre=/usr/bin/docker pull {{ night_shift_image }}
+          ExecStart=/usr/bin/docker run --rm --name night-shift --read-only --tmpfs /tmp:size=16m --cap-drop=ALL --security-opt=no-new-privileges:true -p 80:8080 {{ night_shift_image }}
+          ExecStop=/usr/bin/docker stop -t 25 night-shift
+          TimeoutStopSec=30
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - Перечитать systemd
+        - Перезапустить NIGHT SHIFT
+
+    - name: Применить новый unit до проверки сервиса
+      ansible.builtin.meta: flush_handlers
+
+    - name: NIGHT SHIFT запущен и включён в автозагрузку
+      ansible.builtin.systemd_service:
+        name: night-shift
+        state: started
+        enabled: true
+
+    - name: Дождаться readiness реального приложения
+      ansible.builtin.uri:
+        url: http://127.0.0.1/readyz
+        status_code: 200
+      register: readiness
+      retries: 20
+      delay: 2
+      until: readiness.status == 200
+      changed_when: false
+
+  handlers:
+    - name: Перечитать systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Перезапустить NIGHT SHIFT
+      ansible.builtin.systemd_service:
+        name: night-shift
+        state: restarted

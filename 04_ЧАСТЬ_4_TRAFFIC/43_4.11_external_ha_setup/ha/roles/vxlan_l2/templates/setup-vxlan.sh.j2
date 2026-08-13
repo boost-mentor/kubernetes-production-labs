@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+modprobe vxlan
+if ! ip link show vxlan100 >/dev/null 2>&1; then
+  ip link add vxlan100 type vxlan id 100 \
+    local {{ ansible_default_ipv4.address }} dstport 4789 nolearning
+fi
+ip address replace {{ ha_overlay_ip }}/{{ ha_vip_prefix }} dev vxlan100
+ip link set vxlan100 up
+
+{% for peer in groups['load_balancers'] if peer != inventory_hostname %}
+bridge fdb show dev vxlan100 | grep -q "00:00:00:00:00:00 dst {{ hostvars[peer].ansible_default_ipv4.address }}" || \
+  bridge fdb append 00:00:00:00:00:00 dev vxlan100 dst {{ hostvars[peer].ansible_default_ipv4.address }}
+{% endfor %}

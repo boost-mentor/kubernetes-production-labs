@@ -1,0 +1,2 @@
+# ② group_vars — перебивает defaults роли
+gear: "Рация (group_vars)"

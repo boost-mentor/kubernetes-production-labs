@@ -1,0 +1,106 @@
+# The same production-oriented NIGHT SHIFT binary demonstrates both outcomes.
+# Memory above a cgroup limit is OOMKilled; CPU above a limit is throttled.
+# Self-load endpoints are explicitly enabled only in this isolated lab.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift-oom
+  namespace: traffic-lab
+  labels:
+    app: night-shift-oom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-oom
+  template:
+    metadata:
+      labels:
+        app: night-shift-oom
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 15
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: night-shift
+          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          env:
+            - name: LAB_ENDPOINTS_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 500m, memory: 96Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 16Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift-throttled
+  namespace: traffic-lab
+  labels:
+    app: night-shift-throttled
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-throttled
+  template:
+    metadata:
+      labels:
+        app: night-shift-throttled
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 15
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: night-shift
+          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          env:
+            - name: LAB_ENDPOINTS_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 100m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 16Mi }

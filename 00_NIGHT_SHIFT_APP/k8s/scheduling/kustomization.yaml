@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+  - postgres-disposable.yaml
+patches:
+  - path: app-with-postgres-patch.yaml
+configMapGenerator:
+  - name: night-shift-db-init
+    namespace: traffic-lab
+    files:
+      - 001_init.sql=files/001_init.sql
+generatorOptions:
+  disableNameSuffixHash: true

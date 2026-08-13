@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# ЛАБА 1.10 · Сплит-скрин: 5 сравнений managed vs self-managed
+# Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
+
+LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+SOURCE_ROOT="$REPO_ROOT"
+
+kubectl --context yc-managed apply -f ./night_shift.yaml
+kubectl --context yc-managed -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl --context yc-managed -n traffic-lab patch svc night-shift --type merge -p '{"spec":{"type":"LoadBalancer"}}'
+
+# 1. Где control-plane?
+kubectl --context kubespray get nodes
+kubectl --context yc-managed get nodes
+
+# 2. Кто владеет etcd?
+kubectl --context kubespray -n kube-system get pods | grep etcd
+kubectl --context yc-managed -n kube-system get pods | grep etcd || true
+
+# 3. Кто отвечает за сертификаты?
+read -r -p "public/floating IP node1: " NODE1_PUBLIC_IP
+ssh "root@$NODE1_PUBLIC_IP" 'sudo kubeadm certs check-expiration | head -12'
+
+# 4. Кто даёт внешний адрес Service?
+kubectl --context kubespray -n traffic-lab get svc night-shift-metallb -o wide
+kubectl --context yc-managed -n traffic-lab get svc night-shift -w
+
+# 5. Что видно в control plane облака?
+yc managed-kubernetes cluster list
+yc managed-kubernetes node-group list
+# В браузере рядом: self-managed 5 VM в уроке и managed cluster в Yandex UI.

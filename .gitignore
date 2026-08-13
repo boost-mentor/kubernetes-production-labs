@@ -1,0 +1,14 @@
+.DS_Store
+**/.env
+**/.terraform/
+**/.venv/
+**/vendor/
+**/terraform.tfvars
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/.vault_pass
+**/inventory/video2/
+**/inventory/video2/inventory.ini
+**/ha/inventory.ini
+**/.failed-active-host

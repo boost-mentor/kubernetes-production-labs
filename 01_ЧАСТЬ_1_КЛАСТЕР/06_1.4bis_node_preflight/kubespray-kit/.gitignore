@@ -1,0 +1,4 @@
+.venv/
+vendor/
+inventory/video2/
+*.retry

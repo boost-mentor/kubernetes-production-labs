@@ -1,0 +1,2 @@
+# ③ host_vars — перебивает group_vars
+gear: "Ключ-карта (host_vars)"

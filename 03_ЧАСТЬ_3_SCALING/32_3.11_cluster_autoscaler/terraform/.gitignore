@@ -1,0 +1,11 @@
+# Terraform state — содержит СЕКРЕТЫ в открытом виде
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+# Реальные значения переменных
+terraform.tfvars
+*.auto.tfvars
+# Планы могут содержать чувствительные данные
+*.tfplan
+crash.log

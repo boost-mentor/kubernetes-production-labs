@@ -1,0 +1,51 @@
+---
+- name: VIDEO2 · узнать реальные приватные адреса всех пяти VM
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks: []
+
+- name: VIDEO2 · построить общий L2 между lb1 и lb2
+  hosts: load_balancers
+  become: true
+  gather_facts: false
+  roles:
+    - role: vxlan_l2
+
+- name: VIDEO2 · установить HAProxy по одной LB-VM
+  hosts: load_balancers
+  become: true
+  gather_facts: false
+  serial: 1
+  roles:
+    - role: haproxy
+
+- name: VIDEO2 · включить keepalived на паре
+  hosts: load_balancers
+  become: true
+  gather_facts: false
+  roles:
+    - role: keepalived
+
+- name: VIDEO2 · доказать итог без изменения кластера
+  hosts: load_balancers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Проверить конфигурацию HAProxy
+      ansible.builtin.command: haproxy -c -f /etc/haproxy/haproxy.cfg
+      changed_when: false
+
+    - name: Проверить сервисы
+      ansible.builtin.command: "systemctl is-active {{ item }}"
+      changed_when: false
+      loop: [haproxy, keepalived]
+
+    - name: Проверить HTTP через VIP из общей L2-зоны
+      ansible.builtin.uri:
+        url: "http://{{ ha_vip }}:{{ ha_frontend_port }}/"
+        status_code: 200
+      register: vip_http
+      retries: 15
+      delay: 2
+      until: vip_http.status == 200

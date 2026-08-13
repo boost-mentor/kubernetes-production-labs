@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift
+  namespace: traffic-lab
+spec:
+  template:
+    spec:
+      containers:
+        - name: night-shift
+          env:
+            - name: DB_HOST
+              value: night-shift-postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: night-shift-db
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: night-shift-db
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: night-shift-db
+                  key: POSTGRES_PASSWORD
+            - name: DB_SSLMODE
+              value: disable

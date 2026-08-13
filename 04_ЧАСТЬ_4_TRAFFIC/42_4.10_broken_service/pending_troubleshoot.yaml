@@ -1,0 +1,161 @@
+# pending_troubleshoot.yaml — ЛАБА "под висит в Pending". Четыре подопытных,
+# каждый залипает в Pending по СВОЕЙ причине. Задача — по одному вскрыть
+# `kubectl describe pod` и НАУЧИТЬСЯ ЧИТАТЬ строку FailedScheduling в Events.
+#
+# ГЛАВНЫЙ ИНСТРУМЕНТ диагноза (не гадаем — читаем):
+#   kubectl get pods                       # видим статус Pending
+#   kubectl describe pod <pod>             # СНИЗУ в Events -> Reason: FailedScheduling,
+#                                          #   и текст с точной причиной от шедулера
+#   kubectl get events --sort-by=.lastTimestamp   # то же общим списком
+#
+# Pending почти всегда = "шедулер не нашёл НИ ОДНОЙ подходящей ноды".
+# Причина всегда написана словами — надо просто её прочитать и сопоставить.
+#
+# ШПАРГАЛКА "текст в Events -> что чинить":
+#   "Insufficient cpu" / "Insufficient memory"   -> секция 1 (тесно по ресурсам)
+#   "didn't match Pod's node affinity/selector"  -> секция 2 (нет ноды с лейблом)
+#   "had untolerated taint {...}"                 -> секция 3 (нет toleration)
+#   "didn't match pod anti-affinity rules"        -> секция 4 (некуда разнести)
+# ---------------------------------------------------------------------------
+
+# ==== Секция 1. Pending: НЕ ХВАТАЕТ РЕСУРСОВ ================================
+# Просим 64 ГБ памяти, которых на учебной ноде просто нет.
+# В Events: "0/N nodes are available: N Insufficient memory."
+# ЧИНИМ: уменьшить requests.memory до реального (напр. 64Mi).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pending-toobig
+  labels:
+    app: pending-toobig
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pending-toobig
+  template:
+    metadata:
+      labels:
+        app: pending-toobig
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Gi"      # <-- столько памяти на ноде нет -> Pending
+            limits:
+              memory: "64Gi"
+
+# ==== Секция 2. Pending: nodeSelector НЕ СОВПАЛ ============================
+# Требуем ноду с лейблом disktype=nvme, а такой в кластере нет.
+# В Events: "didn't match Pod's node affinity/selector".
+# ЧИНИМ: либо повесить лейбл `kubectl label node <n> disktype=nvme`,
+#        либо убрать/поправить nodeSelector.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pending-nodeselector
+  labels:
+    app: pending-nodeselector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pending-nodeselector
+  template:
+    metadata:
+      labels:
+        app: pending-nodeselector
+    spec:
+      nodeSelector:
+        disktype: nvme          # <-- ноды с таким лейблом нет -> Pending
+      containers:
+        - name: app
+          image: nginx:1.27
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+
+# ==== Секция 3. Pending: НЕПЕРЕНОСИМЫЙ TAINT ================================
+# ПОДГОТОВКА (сделать ДО apply, иначе причины не будет):
+#   kubectl taint nodes <все рабочие ноды> demo=blocked:NoSchedule
+# Под без toleration на этот taint не сядет никуда.
+# В Events: "had untolerated taint {demo: blocked}".
+# ЧИНИМ: добавить поду toleration (см. taints_tolerations.yaml)
+#        или снять taint: `kubectl taint nodes <n> demo=blocked:NoSchedule-`.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pending-taint
+  labels:
+    app: pending-taint
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pending-taint
+  template:
+    metadata:
+      labels:
+        app: pending-taint
+    spec:
+      # tolerations СПЕЦИАЛЬНО не заданы -> taint demo=blocked отпугнёт под.
+      containers:
+        - name: app
+          image: nginx:1.27
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+
+# ==== Секция 4. Pending: жёсткая anti-affinity, НЕКУДА РАЗНЕСТИ =============
+# Требуем каждую реплику на отдельной ноде, а реплик больше, чем нод.
+# На кластере с 2 нодами 3-я реплика зависнет.
+# В Events: "didn't match pod anti-affinity rules".
+# ЧИНИМ: добавить ноду, снизить replicas, или сделать anti-affinity preferred.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pending-antiaffinity
+  labels:
+    app: pending-antiaffinity
+spec:
+  replicas: 3                   # <-- на 2 нодах третья реплика -> Pending
+  selector:
+    matchLabels:
+      app: pending-antiaffinity
+  template:
+    metadata:
+      labels:
+        app: pending-antiaffinity
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: pending-antiaffinity
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: app
+          image: nginx:1.27
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"

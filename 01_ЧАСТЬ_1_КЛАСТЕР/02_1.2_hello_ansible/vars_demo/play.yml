@@ -1,0 +1,21 @@
+# ЛЕСЕНКА ПРИОРИТЕТОВ ПЕРЕМЕННЫХ — ВЖИВУЮ.
+# Одна переменная `gear` объявлена на ЧЕТЫРЁХ уровнях. Раскомментируй/запусти
+# по шагам — и увидишь, кто победил:
+#
+#   ansible-playbook -i inventory.ini play.yml
+#       → «Ключ-карта (host_vars)» — host_vars бьёт group_vars и defaults роли
+#   # раскомментируй блок vars ниже и запусти снова:
+#       → «Пропуск ночной смены (vars плейбука)» — vars плейбука бьёт host_vars
+#   ansible-playbook -i inventory.ini play.yml -e '{"gear":"режим перегруза (-e)"}'
+#   ⚠️ значение С ПРОБЕЛАМИ передаётся ТОЛЬКО в JSON-форме: key=value Ansible
+#      режет по пробелам и возьмёт лишь первое слово («режим»)
+#       → «режим перегруза (-e)»   — extra vars бьют ВСЁ, всегда
+#
+# Порядок (слабый → сильный): defaults роли → group_vars → host_vars → vars play → -e
+- name: Приоритеты переменных
+  hosts: night_office
+  gather_facts: false
+  # vars:
+  #   gear: "Пропуск ночной смены (vars плейбука)"   # ④ раскомментировать на шаге 2
+  roles:
+    - dispatcher

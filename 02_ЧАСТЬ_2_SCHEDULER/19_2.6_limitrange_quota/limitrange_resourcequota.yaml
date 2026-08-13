@@ -1,0 +1,67 @@
+# Ограничения на уровне NAMESPACE (в части 1 этого не было — только на уровне контейнера).
+# Применять в отдельный ns, чтобы не поломать демо-кластер:
+#   kubectl create ns team-dev && kubectl apply -f limitrange_resourcequota.yaml -n team-dev
+---
+# LimitRange — рамки и ЗНАЧЕНИЯ ПО УМОЛЧАНИЮ. Главная польза: разработчик задеплоил
+# под БЕЗ requests/limits → он НЕ станет BestEffort, ему подставятся дефолты отсюда.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-limits
+spec:
+  limits:
+    - type: Container
+      defaultRequest:            # подставится, если разработчик не указал requests
+        cpu: 100m
+        memory: 128Mi
+      default:                   # подставится, если не указал limits
+        cpu: 500m
+        memory: 512Mi
+      min:                       # меньше нельзя — под не создастся
+        cpu: 50m
+        memory: 64Mi
+      max:                       # больше нельзя
+        cpu: "2"
+        memory: 2Gi
+      maxLimitRequestRatio:      # limit не может быть больше request более чем в N раз
+        cpu: 4                   # защита от «request 10m / limit 4 CPU» — шедулер обманут
+        memory: 4
+    - type: PersistentVolumeClaim
+      min: {storage: 1Gi}
+      max: {storage: 50Gi}
+---
+# ResourceQuota — СУММАРНЫЙ потолок на весь namespace. Классика: команде выдали
+# кусок кластера, дальше пусть сами решают, как его делить.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-quota
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    # ограничение по количеству объектов — чтобы не наплодили 200 сервисов и LB:
+    pods: "30"
+    services: "10"
+    services.loadbalancers: "2"      # каждый LB в облаке = деньги
+    persistentvolumeclaims: "10"
+    requests.storage: 100Gi
+---
+# Квота с ОБЛАСТЬЮ ДЕЙСТВИЯ: не больше 5 подов без указанных ресурсов.
+# Отличный «злой» пример: BestEffort-поды первыми идут под нож OOM-Killer'а,
+# поэтому их количество ограничиваем жёстко.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: besteffort-cap
+spec:
+  scopes: [BestEffort]
+  hard:
+    pods: "5"
+# ⚠️ ГРАБЛЯ ДЛЯ КАДРА: как только в namespace появилась ResourceQuota на requests/limits —
+# любой под БЕЗ указанных requests/limits перестаёт создаваться:
+#   Error: failed quota: must specify limits.cpu, limits.memory...
+# Спасает как раз LimitRange с default/defaultRequest — он их подставит.
+# То есть эти два объекта работают В ПАРЕ. Это частый вопрос на собесе.

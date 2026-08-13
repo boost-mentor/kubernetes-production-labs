@@ -1,0 +1,118 @@
+# Three resource policies applied to the SAME Night Shift binary. This keeps
+# the experiment honest: QoS changes because of Kubernetes policy, not because
+# we secretly switched applications.
+#
+# These variants are intentionally deployed only for the resource lab. The
+# production baseline is apps/night-shift/k8s/base/deployment.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift-guaranteed
+  namespace: traffic-lab
+  labels:
+    app: night-shift-guaranteed
+    lab.boostmentor.dev/qos: guaranteed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-guaranteed
+  template:
+    metadata:
+      labels:
+        app: night-shift-guaranteed
+        lab.boostmentor.dev/qos: guaranteed
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: night-shift
+          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          ports:
+            - { name: http, containerPort: 8080 }
+          resources:
+            requests: { cpu: 250m, memory: 128Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift-burstable
+  namespace: traffic-lab
+  labels:
+    app: night-shift-burstable
+    lab.boostmentor.dev/qos: burstable
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-burstable
+  template:
+    metadata:
+      labels:
+        app: night-shift-burstable
+        lab.boostmentor.dev/qos: burstable
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: night-shift
+          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          ports:
+            - { name: http, containerPort: 8080 }
+          resources:
+            requests: { cpu: 100m, memory: 64Mi }
+            limits: { cpu: 500m, memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift-besteffort
+  namespace: traffic-lab
+  labels:
+    app: night-shift-besteffort
+    lab.boostmentor.dev/qos: best-effort
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-besteffort
+  template:
+    metadata:
+      labels:
+        app: night-shift-besteffort
+        lab.boostmentor.dev/qos: best-effort
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: night-shift
+          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          ports:
+            - { name: http, containerPort: 8080 }
+          # Deliberately no resources: this pod becomes BestEffort. Never use
+          # this variant as the production baseline.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532

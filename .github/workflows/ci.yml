@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+        env:
+          POSTGRES_DB: nightshift
+          POSTGRES_USER: nightshift
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nightshift -d nightshift"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    defaults:
+      run:
+        working-directory: 00_NIGHT_SHIFT_APP
+    env:
+      NIGHT_SHIFT_POSTGRES_TEST: "1"
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_USER: nightshift
+      TEST_DB_PASSWORD: ci-only-password
+      TEST_DB_NAME: nightshift
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: 00_NIGHT_SHIFT_APP/go.mod
+          cache-dependency-path: 00_NIGHT_SHIFT_APP/go.sum
+      - name: Unit tests with race detector
+        run: go test -race ./...
+      - name: Static analysis
+        run: go vet ./...
+      - name: Build binary
+        run: CGO_ENABLED=0 go build -trimpath ./cmd/night-shift
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      - name: Build recording image without publishing
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: 00_NIGHT_SHIFT_APP
+          push: false
+          platforms: linux/amd64
+          build-args: |
+            VERSION=ci
+            VCS_REF=${{ github.sha }}
+            BUILD_DATE=1970-01-01T00:00:00Z
+
+  repository:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4
+      - name: Shell syntax for all 45 recording command files
+        run: find . -type f -name commands.sh -print0 | xargs -0 -n1 bash -n
+      - name: Terraform formatting
+        run: terraform fmt -check -recursive
+      - name: Validate self-managed Terraform
+        working-directory: 01_ЧАСТЬ_1_КЛАСТЕР/04_1.3_five_vm_terraform/terraform
+        run: terraform init -backend=false && terraform validate
+      - name: Validate managed Terraform
+        working-directory: 01_ЧАСТЬ_1_КЛАСТЕР/05_1.4_managed_cluster/terraform
+        run: terraform init -backend=false && terraform validate
+      - name: Render Kubernetes packages
+        run: |
+          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/base >/dev/null
+          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/overlays/recording >/dev/null
+          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scaling >/dev/null
+          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scheduling >/dev/null
+          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scheduling/production-reference >/dev/null

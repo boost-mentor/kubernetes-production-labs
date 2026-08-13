@@ -1,0 +1,63 @@
+name: night-shift
+
+services:
+  postgres:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      POSTGRES_DB: nightshift
+      POSTGRES_USER: nightshift
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nightshift -d nightshift"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    networks: [backend]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: night-shift:2.0.0
+    environment:
+      PORT: "8080"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: nightshift
+      DB_NAME: nightshift
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      DB_SSLMODE: disable
+      # Explicitly enabled only in the isolated lab profile. The production
+      # default keeps the self-load endpoints unavailable.
+      LAB_ENDPOINTS_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "/night-shift", "-healthcheck"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks: [edge, backend]
+    restart: unless-stopped
+
+networks:
+  edge: {}
+  backend:
+    internal: true
+
+volumes:
+  postgres-data: {}

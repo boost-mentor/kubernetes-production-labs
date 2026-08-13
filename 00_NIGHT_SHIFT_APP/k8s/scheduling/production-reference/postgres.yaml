@@ -1,0 +1,107 @@
+# Production reference, not a claim of PostgreSQL HA. In a real system,
+# prefer a managed database or an operator with replicas, backups and PITR.
+apiVersion: v1
+kind: Service
+metadata:
+  name: night-shift-postgres
+  namespace: traffic-lab
+spec:
+  clusterIP: None
+  selector:
+    app: night-shift-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: night-shift-postgres
+  namespace: traffic-lab
+spec:
+  serviceName: night-shift-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: night-shift-postgres
+  template:
+    metadata:
+      labels:
+        app: night-shift-postgres
+        app.kubernetes.io/name: night-shift
+        app.kubernetes.io/component: database
+    spec:
+      terminationGracePeriodSeconds: 60
+      automountServiceAccountToken: false
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: database
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload.boostmentor.dev/tier
+                    operator: In
+                    values: [database]
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: night-shift-db
+          readinessProbe:
+            exec:
+              command: ["sh", "-ec", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-ec", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d/001_init.sql
+              subPath: 001_init.sql
+              readOnly: true
+      volumes:
+        - name: init
+          configMap:
+            name: night-shift-db-init
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

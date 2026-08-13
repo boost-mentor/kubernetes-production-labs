@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-shift
+  namespace: traffic-lab
+spec:
+  template:
+    spec:
+      containers:
+        - name: night-shift
+          env:
+            - name: LAB_ENDPOINTS_ENABLED
+              value: "true"
