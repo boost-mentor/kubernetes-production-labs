@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ЛАБА 3.0 · Metrics Server: почему Helm, а не `kubectl apply` (и что такое `--kubelet-insecure-tls`)
+# ЛАБА 3.0 · Metrics Server через Kubespray addons: без случайного apply и insecure TLS
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
 # Первый блок работает и при копировании из VS Code в новый терминал:
