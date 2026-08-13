@@ -2,15 +2,20 @@
 # ЛАБА 3.9 · HPA на 4 панелях: 1 → 6 реплик по формуле
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/03_ЧАСТЬ_3_SCALING/30_3.9_hpa"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
-kubectl apply -k ./app
+kubectl apply -k ./app/overlays/recording
 kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl apply -f ./debug-client.yaml
+kubectl -n traffic-lab wait --for=condition=Ready pod/client --timeout=180s
 kubectl apply -f ./hpa_lab.yaml
+kubectl -n traffic-lab get hpa night-shift
+kubectl -n traffic-lab exec client -- sh -c   'for i in $(seq 1 8); do curl -fsS "http://night-shift/overload?sec=90" >/dev/null & done; wait'
 kubectl -n traffic-lab get hpa night-shift -w
-# Во втором терминале: несколько запросов запускают контролируемую нагрузку.
-read -r -p "Night Shift URL (without trailing slash): " NIGHT_SHIFT_URL
-for i in {1..8}; do curl -fsS "$NIGHT_SHIFT_URL/overload?sec=90" >/dev/null & done
+# HPA считает utilization от requests; Ctrl+C после роста реплик.
 kubectl -n traffic-lab get pods -l app=night-shift -w

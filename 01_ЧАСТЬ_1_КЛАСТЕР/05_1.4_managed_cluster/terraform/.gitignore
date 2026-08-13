@@ -2,7 +2,7 @@
 *.tfstate
 *.tfstate.*
 .terraform/
-.terraform.lock.hcl
+# .terraform.lock.hcl КОММИТИМ: он фиксирует выбранные версии провайдера.
 # Реальные значения переменных
 terraform.tfvars
 *.auto.tfvars

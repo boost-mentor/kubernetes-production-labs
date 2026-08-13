@@ -2,9 +2,12 @@
 # ЛАБА 1.7 · CIDR: по IP пода угадываем ноду
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/09_1.7_cidr_to_node"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.podCIDR}{"\n"}{end}'
 # → node1  10.233.64.0/24

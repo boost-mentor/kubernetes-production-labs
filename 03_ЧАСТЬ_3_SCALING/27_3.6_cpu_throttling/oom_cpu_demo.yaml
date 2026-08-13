@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: night-shift
-          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           env:
             - name: LAB_ENDPOINTS_ENABLED
               value: "true"
@@ -78,7 +78,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: night-shift
-          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           env:
             - name: LAB_ENDPOINTS_ENABLED
               value: "true"

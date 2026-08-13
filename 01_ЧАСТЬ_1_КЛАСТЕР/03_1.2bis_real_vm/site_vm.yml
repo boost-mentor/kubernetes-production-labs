@@ -3,7 +3,7 @@
 #
 # ЗАПУСК (в кадре; IP — из terraform output vm_ip):
 #   echo "[demo_vm]" > vm_inventory.ini
-#   echo "<IP> ansible_user=root" >> vm_inventory.ini
+#   echo "<IP> ansible_user=<terraform output ssh_user>" >> vm_inventory.ini
 #   ansible -i vm_inventory.ini all -m ping                 # pong с ЖИВОЙ машины
 #   ansible-playbook -i vm_inventory.ini site_vm.yml        # runtime + systemd unit
 #   open http://<IP>/                                       # реальная NIGHT SHIFT UI
@@ -12,7 +12,7 @@
   hosts: demo_vm
   become: true
   vars:
-    night_shift_image: ghcr.io/boost-mentor/night-shift:2.0.0
+    night_shift_image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
   tasks:
     - name: Имя машины — говорящее
       ansible.builtin.hostname:

@@ -27,6 +27,18 @@ resource "yandex_vpc_security_group" "k8s" {
     to_port           = 65535
   }
   ingress {
+    description    = "Kubernetes API HTTPS только из доверенного CIDR управления"
+    protocol       = "TCP"
+    port           = 443
+    v4_cidr_blocks = [var.allowed_api_cidr]
+  }
+  ingress {
+    description    = "Kubernetes API native port только из доверенного CIDR управления"
+    protocol       = "TCP"
+    port           = 6443
+    v4_cidr_blocks = [var.allowed_api_cidr]
+  }
+  ingress {
     description    = "NodePort только из доверенного CIDR записи"
     protocol       = "TCP"
     from_port      = 30000

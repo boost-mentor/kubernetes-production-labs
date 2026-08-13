@@ -2,12 +2,20 @@
 # ЛАБА 1.5 · Kubespray full: из трёх Linux-машин — кластер
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/07_1.5_kubespray_full"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
-cd "$LAB_DIR/kubespray-kit"
+KUBESPRAY_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/06_1.4bis_node_preflight/kubespray-kit"
+cd "$KUBESPRAY_DIR"
 ./bootstrap.sh
+test -f inventory/video2/inventory.ini || {
+  echo "Сначала выполни лабу 1.4-БИС: она создаёт inventory из IP стенда" >&2
+  return 1 2>/dev/null || exit 1
+}
 sed -n '1,220p' vendor/kubespray/cluster.yml
 find vendor/kubespray/roles -maxdepth 1 -mindepth 1 -type d | head -20
 sed -n '1,120p' inventory/video2/group_vars/k8s_cluster/k8s-cluster.yml

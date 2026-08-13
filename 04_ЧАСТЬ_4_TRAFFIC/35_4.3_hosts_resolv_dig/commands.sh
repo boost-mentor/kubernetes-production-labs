@@ -2,9 +2,12 @@
 # ЛАБА 4.3 · Кто отвечает первым: hosts → resolv.conf → dig +trace
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/35_4.3_hosts_resolv_dig"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 cat /etc/hosts            # 1. локальный файл — бьёт всё (для системного резолвера!)
 cat /etc/resolv.conf      # 2. какой DNS-сервер спрашиваем

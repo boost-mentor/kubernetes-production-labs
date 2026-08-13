@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
-# ЛАБА 1.12 · HAProxy L4 перед кластером: балансируем на NodePort
+# ЛАБА 4.11 · Внешний HA-вход: HAProxy L4 + keepalived/VRRP
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/43_4.11_external_ha_setup"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
+
+# MetalLB был реальной практикой части 1. Перед отдельным внешним HA-этажом
+# убираем его Service/data plane, чтобы не выдавать две точки входа за одну.
+kubectl --context kubespray -n traffic-lab delete svc night-shift-metallb --ignore-not-found
+helm --kube-context kubespray uninstall metallb -n metallb-system --ignore-not-found
 
 kubectl --context kubespray apply -k "$REPO_ROOT/00_NIGHT_SHIFT_APP/k8s/base"
 kubectl --context kubespray -n traffic-lab rollout status deploy/night-shift --timeout=180s
 kubectl --context kubespray apply -f ./lb-demo.yaml
 kubectl --context kubespray -n traffic-lab get svc night-shift-ha-nodeport -o wide
 
-cd ha
+HA_DIR="$LAB_DIR/ha"
+cd "$HA_DIR"
 read -r -p "public IP lb1: " LB1_IP
 read -r -p "public IP lb2: " LB2_IP
 read -r -p "public IP node1: " NODE1_IP

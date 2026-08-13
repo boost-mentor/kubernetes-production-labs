@@ -69,7 +69,10 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4
       - name: Shell syntax for all 45 recording command files
-        run: find . -type f -name commands.sh -print0 | xargs -0 -n1 bash -n
+        run: |
+          test "$(find . -type f -name commands.sh | wc -l | tr -d ' ')" = 45
+          test "$(find . -type l | wc -l | tr -d ' ')" = 0
+          find . -type f -name commands.sh -print0 | xargs -0 -n1 bash -n
       - name: Terraform formatting
         run: terraform fmt -check -recursive
       - name: Validate self-managed Terraform
@@ -78,10 +81,17 @@ jobs:
       - name: Validate managed Terraform
         working-directory: 01_ЧАСТЬ_1_КЛАСТЕР/05_1.4_managed_cluster/terraform
         run: terraform init -backend=false && terraform validate
+      - name: Validate introductory and autoscaler Terraform
+        run: |
+          for terraform_root in \
+            01_ЧАСТЬ_1_КЛАСТЕР/01_1.1_hello_terraform \
+            01_ЧАСТЬ_1_КЛАСТЕР/03_1.2bis_real_vm \
+            03_ЧАСТЬ_3_SCALING/32_3.11_cluster_autoscaler/terraform; do
+            terraform -chdir="$terraform_root" init -backend=false -input=false
+            terraform -chdir="$terraform_root" validate
+          done
       - name: Render Kubernetes packages
         run: |
-          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/base >/dev/null
-          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/overlays/recording >/dev/null
-          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scaling >/dev/null
-          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scheduling >/dev/null
-          kubectl kustomize 00_NIGHT_SHIFT_APP/k8s/scheduling/production-reference >/dev/null
+          while IFS= read -r -d '' kustomization; do
+            kubectl kustomize "$(dirname "$kustomization")" >/dev/null
+          done < <(find . -type f -name kustomization.yaml -print0)

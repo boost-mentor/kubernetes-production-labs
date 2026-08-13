@@ -2,9 +2,12 @@
 # ЛАБА 2.2 · Выделенная DB-нода: taint — это вход по пропускам
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/02_ЧАСТЬ_2_SCHEDULER/15_2.2_taint_toleration"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl create namespace traffic-lab --dry-run=client -o yaml | kubectl apply -f -
 kubectl describe node node1 | grep -i taint     # → встроенный control-plane:NoSchedule

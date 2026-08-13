@@ -2,9 +2,12 @@
 # ЛАБА 4.7 · NodePort: вход снаружи через ЛЮБУЮ ноду
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/39_4.7_nodeport"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl apply -f ./night_shift.yaml
 kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s

@@ -2,9 +2,12 @@
 # ЛАБА 4.5 · traceroute + таблица маршрутов: по маске выбирается интерфейс
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/37_4.5_routes_traceroute"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 route -n get default
 read -r -p "public IP node1: " NODE1_PUBLIC_IP

@@ -49,8 +49,8 @@ spec:
                     app: night-shift
       containers:
         - name: night-shift
-          # REC: replace with the immutable tag/digest built before recording.
-          image: ghcr.io/boost-mentor/night-shift:2.0.0
+          # Multi-arch image pinned by immutable OCI index digest.
+          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

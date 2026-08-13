@@ -1,7 +1,7 @@
 # Kubernetes production labs — Video 2
 
 Чистый recording repository: отдельное Go-приложение NIGHT SHIFT и 45
-самостоятельных лабораторных по Terraform, Ansible/Kubespray, scheduler,
+последовательных лабораторных по Terraform, Ansible/Kubespray, scheduler,
 ресурсам, scaling и пути трафика.
 
 - `00_NIGHT_SHIFT_APP` — Go, tests, Docker, Compose + PostgreSQL, Kustomize;
@@ -13,6 +13,11 @@
 В каждой лабораторной `commands.sh` — не исполняемый setup-скрипт, а блоки
 команд для копирования по одному во время записи. Секреты, private keys,
 runtime inventory, Terraform state/plan/tfvars в git не входят.
+
+Два handoff намеренно сохраняют runtime-state между соседними папками:
+`06 -> 07` использует один Kubespray inventory, а `43 -> 44 -> 45` — один
+HA inventory и маркер активного балансировщика. Команды указывают эти пути
+явно; дублированных расходящихся копий нет.
 
 ```bash
 git clone https://github.com/boost-mentor/kubernetes-production-labs.git

@@ -2,9 +2,12 @@
 # ЛАБА 4.8 · Service ≠ процесс: ClusterIP, EndpointSlice и смерть пода
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/40_4.8_service_endpointslice"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl -n traffic-lab get svc night-shift -o wide            # → ClusterIP: 10.233.x.x
 kubectl -n traffic-lab get pod -l app=night-shift -o wide     # → IP подов — ДРУГИЕ (из Pod CIDR)

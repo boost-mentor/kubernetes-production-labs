@@ -2,9 +2,12 @@
 # ЛАБА 3.7 · Симуляция: кого съест OOM-Killer (QoS)
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/03_ЧАСТЬ_3_SCALING/28_3.7_qos_oom"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl create namespace traffic-lab --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f ./requests_limits.yaml

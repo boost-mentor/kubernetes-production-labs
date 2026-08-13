@@ -2,9 +2,12 @@
 # ЛАБА 3.1 · Два читателя одного манифеста: cgroup vs планировщик
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/03_ЧАСТЬ_3_SCALING/22_3.1_requests_limits_cgroup"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl create namespace traffic-lab --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f ./requests_limits.yaml
@@ -18,5 +21,8 @@ kubectl describe node "$NODE" | sed -n '/Allocated resources:/,/Events:/p'
 kubectl -n traffic-lab exec "$POD" -- cat /sys/fs/cgroup/memory.max || true
 CONTAINER_ID=$(kubectl -n traffic-lab get pod "$POD" -o jsonpath='{.status.containerStatuses[0].containerID}' | sed 's#^[^:]*://##')
 read -r -p "public/floating IP ноды $NODE: " NODE_SSH_HOST
-ssh "root@$NODE_SSH_HOST" "PID=$(sudo crictl inspect '$CONTAINER_ID' | sed -n 's/.*"pid": ([0-9][0-9]*).*//p' | head -1); sudo nsenter -t "$PID" -m cat /sys/fs/cgroup/memory.max; sudo nsenter -t "$PID" -m cat /sys/fs/cgroup/cpu.max"
+REMOTE_PID=$(ssh "root@$NODE_SSH_HOST" "sudo crictl inspect '$CONTAINER_ID'" | \
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["info"]["pid"])')
+ssh "root@$NODE_SSH_HOST" \
+  "sudo nsenter -t '$REMOTE_PID' -m cat /sys/fs/cgroup/memory.max; sudo nsenter -t '$REMOTE_PID' -m cat /sys/fs/cgroup/cpu.max"
 # Kernel читает limits из cgroup; scheduler суммирует requests на ноде.

@@ -2,9 +2,12 @@
 # ЛАБА 1.8 · Безопасное обновление узла: cordon → drain → uncordon
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/10_1.8_safe_upgrade"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
 kubectl apply -k ./app
 kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s

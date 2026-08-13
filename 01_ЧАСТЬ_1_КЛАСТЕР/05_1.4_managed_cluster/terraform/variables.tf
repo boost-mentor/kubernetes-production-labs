@@ -76,3 +76,13 @@ variable "allowed_nodeport_cidr" {
     error_message = "Укажи ограниченный CIDR, например 203.0.113.42/32."
   }
 }
+
+variable "allowed_api_cidr" {
+  description = "Доверенный CIDR управления Kubernetes API, обычно текущий public IP /32"
+  type        = string
+
+  validation {
+    condition     = can(cidrhost(var.allowed_api_cidr, 0)) && var.allowed_api_cidr != "0.0.0.0/0" && var.allowed_api_cidr != "::/0"
+    error_message = "Укажи ограниченный CIDR управления, например 203.0.113.42/32."
+  }
+}

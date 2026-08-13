@@ -2,18 +2,26 @@
 # ЛАБА 1.4 · Managed-кластер через terraform apply
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$LAB_DIR/../.." && pwd -P)"
+# Первый блок работает и при копировании из VS Code в новый терминал:
+# путь вычисляется от корня git clone, а не от случайного текущего каталога.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/05_1.4_managed_cluster"
 SOURCE_ROOT="$REPO_ROOT"
+cd "$LAB_DIR"
 
-cd ../terraform_yandex_managed
+cd "$LAB_DIR/terraform"
 cp terraform.tfvars.example terraform.tfvars
+# Заполни folder_id, service_account_id, public_key и разрешённые CIDR.
+terraform fmt -check -recursive
 terraform init
-terraform plan        # → ~10 ресурсов: сеть, сервисный аккаунт, IAM-роли, кластер, node group
-terraform apply       # yes, ~10 минут — запусти и иди дальше по тетради
+terraform validate
+terraform plan -out=managed.tfplan
+terraform apply managed.tfplan
 
-
-yc managed-kubernetes cluster list                                   # → k8s-managed  RUNNING
+yc managed-kubernetes cluster list
+yc managed-kubernetes node-group list
 yc managed-kubernetes cluster get-credentials k8s-managed --external --force
-kubectl config rename-context $(kubectl config current-context) yc-managed
-kubectl --context yc-managed get nodes    # → 2 ноды, ROLES <none>  ← мастера в списке НЕТ
+kubectl config rename-context "$(kubectl config current-context)" yc-managed
+kubectl --context yc-managed get nodes -o wide
+# В браузере: Yandex Cloud -> Managed Service for Kubernetes -> Nodes.
+# Этот стенд нужен в Ч3 для Cluster Autoscaler, поэтому здесь не destroy.
