@@ -80,7 +80,7 @@ EOF
 
 cat >"$INVENTORY_DIR/group_vars/k8s_cluster/k8s-cluster.yml" <<'EOF'
 ---
-kube_version: v1.34.7
+kube_version: 1.34.7
 kube_network_plugin: calico
 container_manager: containerd
 kube_proxy_mode: ipvs
