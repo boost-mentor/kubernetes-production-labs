@@ -12,8 +12,7 @@
   hosts: demo_vm
   become: true
   vars:
-    # образ собран под историческим именем night-shift — это тот же сервис
-    devops_may_cry_image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
+    devops_may_cry_image: ghcr.io/boost-mentor/devops-may-cry@sha256:41439418d570649055117277a53b17b91fb40dad33dc3fa6b8a151fe68f86ca7
   tasks:
     - name: Имя машины — говорящее
       ansible.builtin.hostname:

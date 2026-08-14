@@ -29,8 +29,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: devops-may-cry
-          # образ собран под историческим именем night-shift — это тот же сервис
-          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
+          image: ghcr.io/boost-mentor/devops-may-cry@sha256:41439418d570649055117277a53b17b91fb40dad33dc3fa6b8a151fe68f86ca7
           ports:
             - { name: http, containerPort: 8080 }
           resources:
@@ -68,8 +67,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: devops-may-cry
-          # образ собран под историческим именем night-shift — это тот же сервис
-          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
+          image: ghcr.io/boost-mentor/devops-may-cry@sha256:41439418d570649055117277a53b17b91fb40dad33dc3fa6b8a151fe68f86ca7
           ports:
             - { name: http, containerPort: 8080 }
           resources:
@@ -107,8 +105,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: devops-may-cry
-          # образ собран под историческим именем night-shift — это тот же сервис
-          image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
+          image: ghcr.io/boost-mentor/devops-may-cry@sha256:41439418d570649055117277a53b17b91fb40dad33dc3fa6b8a151fe68f86ca7
           ports:
             - { name: http, containerPort: 8080 }
           # Deliberately no resources: this pod becomes BestEffort. Never use
