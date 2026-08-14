@@ -15,7 +15,7 @@ find "$repo_root" -type f -name commands.sh -print0 | xargs -0 -n1 bash -n
 }
 
 (
-  cd "$repo_root/00_NIGHT_SHIFT_APP"
+  cd "$repo_root/00_DEVOPS_MAY_CRY_APP"
   go test -race ./...
   go vet ./...
 )

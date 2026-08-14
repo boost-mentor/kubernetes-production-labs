@@ -2,18 +2,18 @@
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: night-shift
+  name: devops-may-cry
   namespace: traffic-lab
 spec:
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: night-shift
+    name: devops-may-cry
   updatePolicy:
     updateMode: "Off"
   resourcePolicy:
     containerPolicies:
-      - containerName: night-shift
+      - containerName: devops-may-cry
         minAllowed:
           cpu: 25m
           memory: 32Mi

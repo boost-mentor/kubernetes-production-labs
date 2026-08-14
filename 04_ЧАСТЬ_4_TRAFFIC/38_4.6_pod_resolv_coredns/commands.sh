@@ -9,13 +9,13 @@ LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/38_4.6_pod_resolv_coredns"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl apply -f ./night_shift.yaml
-kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl apply -f ./devops_may_cry.yaml
+kubectl -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
 kubectl apply -f ./debug-client.yaml
 kubectl -n traffic-lab wait --for=condition=Ready pod/client --timeout=180s
 
 kubectl -n kube-system get pods -l k8s-app=kube-dns -o wide
 kubectl -n traffic-lab exec client -- cat /etc/resolv.conf
-kubectl -n traffic-lab exec client -- dig +short night-shift.traffic-lab.svc.cluster.local
-kubectl -n traffic-lab exec client -- dig +search +short night-shift
+kubectl -n traffic-lab exec client -- dig +short devops-may-cry.traffic-lab.svc.cluster.local
+kubectl -n traffic-lab exec client -- dig +search +short devops-may-cry
 # Короткое имя раскрывается через search list текущего namespace.

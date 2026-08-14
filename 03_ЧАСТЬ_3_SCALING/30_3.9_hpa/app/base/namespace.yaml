@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: traffic-lab
   labels:
-    app.kubernetes.io/part-of: night-shift
+    app.kubernetes.io/part-of: devops-may-cry
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted

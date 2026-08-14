@@ -15,37 +15,37 @@ jobs:
       postgres:
         image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
         env:
-          POSTGRES_DB: nightshift
-          POSTGRES_USER: nightshift
+          POSTGRES_DB: devopsmaycry
+          POSTGRES_USER: devopsmaycry
           POSTGRES_PASSWORD: ci-only-password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U nightshift -d nightshift"
+          --health-cmd "pg_isready -U devopsmaycry -d devopsmaycry"
           --health-interval 2s
           --health-timeout 3s
           --health-retries 20
     defaults:
       run:
-        working-directory: 00_NIGHT_SHIFT_APP
+        working-directory: 00_DEVOPS_MAY_CRY_APP
     env:
-      NIGHT_SHIFT_POSTGRES_TEST: "1"
+      DEVOPS_MAY_CRY_POSTGRES_TEST: "1"
       TEST_DB_HOST: 127.0.0.1
-      TEST_DB_USER: nightshift
+      TEST_DB_USER: devopsmaycry
       TEST_DB_PASSWORD: ci-only-password
-      TEST_DB_NAME: nightshift
+      TEST_DB_NAME: devopsmaycry
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
-          go-version-file: 00_NIGHT_SHIFT_APP/go.mod
-          cache-dependency-path: 00_NIGHT_SHIFT_APP/go.sum
+          go-version-file: 00_DEVOPS_MAY_CRY_APP/go.mod
+          cache-dependency-path: 00_DEVOPS_MAY_CRY_APP/go.sum
       - name: Unit tests with race detector
         run: go test -race ./...
       - name: Static analysis
         run: go vet ./...
       - name: Build binary
-        run: CGO_ENABLED=0 go build -trimpath ./cmd/night-shift
+        run: CGO_ENABLED=0 go build -trimpath ./cmd/devops-may-cry
 
   container:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       - name: Build recording image without publishing
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
-          context: 00_NIGHT_SHIFT_APP
+          context: 00_DEVOPS_MAY_CRY_APP
           push: false
           platforms: linux/amd64
           build-args: |

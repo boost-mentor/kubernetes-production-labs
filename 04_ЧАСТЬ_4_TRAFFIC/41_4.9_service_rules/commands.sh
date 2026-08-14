@@ -9,8 +9,8 @@ LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/41_4.9_service_rules"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-SERVICE_IP="$(kubectl -n traffic-lab get svc night-shift -o jsonpath='{.spec.clusterIP}')"
+SERVICE_IP="$(kubectl -n traffic-lab get svc devops-may-cry -o jsonpath='{.spec.clusterIP}')"
 read -r -p "public/floating IP Kubernetes-ноды: " NODE_PUBLIC_IP
 ssh "root@$NODE_PUBLIC_IP" "sudo ipvsadm -Ln | grep -A4 '$SERVICE_IP' || sudo nft list ruleset | grep -A3 '$SERVICE_IP'"
-kubectl -n traffic-lab get endpointslice -l kubernetes.io/service-name=night-shift -o wide
+kubectl -n traffic-lab get endpointslice -l kubernetes.io/service-name=devops-may-cry -o wide
 # kube-proxy IPVS выбирает backend из EndpointSlice; приложение не знает ClusterIP.

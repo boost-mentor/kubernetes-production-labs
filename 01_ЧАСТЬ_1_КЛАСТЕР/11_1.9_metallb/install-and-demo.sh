@@ -39,12 +39,12 @@ echo "MetalLB explicit reserved pool: $pool_start-$pool_end"
 kubectl apply -f "$work_file"
 
 for attempt in {1..30}; do
-  external_ip=$(kubectl -n traffic-lab get svc night-shift-metallb -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+  external_ip=$(kubectl -n traffic-lab get svc devops-may-cry-metallb -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
   [[ -n "$external_ip" ]] && break
   sleep 2
 done
 
-test -n "${external_ip:-}" || { kubectl -n traffic-lab describe svc night-shift-metallb; exit 1; }
+test -n "${external_ip:-}" || { kubectl -n traffic-lab describe svc devops-may-cry-metallb; exit 1; }
 kubectl -n metallb-system get pods
 kubectl -n metallb-system get ipaddresspool,l2advertisement
 kubectl -n traffic-lab get deploy,pod,svc,endpointslice -o wide

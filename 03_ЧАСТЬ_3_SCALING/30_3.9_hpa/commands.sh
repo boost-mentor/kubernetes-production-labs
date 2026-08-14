@@ -10,12 +10,12 @@ SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
 kubectl apply -k ./app/overlays/recording
-kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
 kubectl apply -f ./debug-client.yaml
 kubectl -n traffic-lab wait --for=condition=Ready pod/client --timeout=180s
 kubectl apply -f ./hpa_lab.yaml
-kubectl -n traffic-lab get hpa night-shift
-kubectl -n traffic-lab exec client -- sh -c   'for i in $(seq 1 8); do curl -fsS "http://night-shift/overload?sec=90" >/dev/null & done; wait'
-kubectl -n traffic-lab get hpa night-shift -w
+kubectl -n traffic-lab get hpa devops-may-cry
+kubectl -n traffic-lab exec client -- sh -c   'for i in $(seq 1 8); do curl -fsS "http://devops-may-cry/overload?sec=90" >/dev/null & done; wait'
+kubectl -n traffic-lab get hpa devops-may-cry -w
 # HPA считает utilization от requests; Ctrl+C после роста реплик.
-kubectl -n traffic-lab get pods -l app=night-shift -w
+kubectl -n traffic-lab get pods -l app=devops-may-cry -w

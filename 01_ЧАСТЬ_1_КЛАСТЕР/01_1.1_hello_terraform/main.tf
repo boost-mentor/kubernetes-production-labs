@@ -1,4 +1,4 @@
-# NIGHT SHIFT · ДИСПЕТЧЕРСКАЯ — весь цикл Terraform за две минуты:
+# DEVOPS MAY CRY · ДИСПЕТЧЕРСКАЯ — весь цикл Terraform за две минуты:
 # init → plan → apply → дрифт → destroy. Без облака, без токенов
 # (но init всё же ходит в интернет за провайдером — прогнать до записи).
 # Ресурсы — обычные файлы: неважно ЧТО создаём, важно КАК Terraform этим управляет.
@@ -47,7 +47,7 @@ resource "local_file" "zhurnal" {
   filename        = "${path.module}/zhurnal.txt"
   file_permission = "0644"
   content         = <<-EOT
-    NIGHT SHIFT · ЖУРНАЛ ЗАЯВОК      смена ${var.shift}
+    DEVOPS MAY CRY · ЖУРНАЛ ЗАЯВОК      смена ${var.shift}
     На телефоне: ${var.dispatcher}
     ----------------------------------------------------------
     401  ул. Тихая, 12   бабайка под кроватью   ночной тариф x2
@@ -67,7 +67,7 @@ resource "local_file" "svodka" {
   filename        = "${path.module}/svodka.txt"
   file_permission = "0644"
   content         = <<-EOT
-    NIGHT SHIFT · СВОДКА СМЕНЫ
+    DEVOPS MAY CRY · СВОДКА СМЕНЫ
     Журнал: ${local_file.zhurnal.filename}, ${length(local_file.zhurnal.content)} символов
     Принято 4 · закрыто 3 · висит заявка 404
     Смену сдал: ${var.dispatcher}. Пицца дежурным — по факту закрытия 404.

@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift
+  name: devops-may-cry
   namespace: traffic-lab
   labels:
-    app: night-shift
-    app.kubernetes.io/name: night-shift
+    app: devops-may-cry
+    app.kubernetes.io/name: devops-may-cry
     app.kubernetes.io/component: api
 spec:
   replicas: 2
@@ -17,12 +17,12 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: night-shift
+      app: devops-may-cry
   template:
     metadata:
       labels:
-        app: night-shift
-        app.kubernetes.io/name: night-shift
+        app: devops-may-cry
+        app.kubernetes.io/name: devops-may-cry
         app.kubernetes.io/component: api
     spec:
       terminationGracePeriodSeconds: 30
@@ -37,7 +37,7 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: night-shift
+              app: devops-may-cry
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -46,10 +46,11 @@ spec:
                 topologyKey: kubernetes.io/hostname
                 labelSelector:
                   matchLabels:
-                    app: night-shift
+                    app: devops-may-cry
       containers:
-        - name: night-shift
+        - name: devops-may-cry
           # Multi-arch image pinned by immutable OCI index digest.
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           imagePullPolicy: IfNotPresent
           ports:

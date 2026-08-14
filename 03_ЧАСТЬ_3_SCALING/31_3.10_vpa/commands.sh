@@ -13,5 +13,5 @@ kubectl apply -k ./base
 ./vpa-kit/install.sh
 ./vpa-kit/preflight.sh
 kubectl apply -f ./vpa_lab.yaml
-kubectl -n traffic-lab describe vpa night-shift | sed -n '/Recommendation:/,$p'
+kubectl -n traffic-lab describe vpa devops-may-cry | sed -n '/Recommendation:/,$p'
 # updateMode=Off: рекомендация видна, поды не перезапускаются.

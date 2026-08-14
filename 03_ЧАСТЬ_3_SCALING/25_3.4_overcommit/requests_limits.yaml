@@ -1,26 +1,26 @@
-# Three resource policies applied to the SAME Night Shift binary. This keeps
+# Three resource policies applied to the SAME DevOps May Cry binary. This keeps
 # the experiment honest: QoS changes because of Kubernetes policy, not because
 # we secretly switched applications.
 #
 # These variants are intentionally deployed only for the resource lab. The
-# production baseline is apps/night-shift/k8s/base/deployment.yaml.
+# production baseline is apps/devops-may-cry/k8s/base/deployment.yaml.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift-guaranteed
+  name: devops-may-cry-guaranteed
   namespace: traffic-lab
   labels:
-    app: night-shift-guaranteed
+    app: devops-may-cry-guaranteed
     lab.boostmentor.dev/qos: guaranteed
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: night-shift-guaranteed
+      app: devops-may-cry-guaranteed
   template:
     metadata:
       labels:
-        app: night-shift-guaranteed
+        app: devops-may-cry-guaranteed
         lab.boostmentor.dev/qos: guaranteed
     spec:
       automountServiceAccountToken: false
@@ -28,7 +28,8 @@ spec:
         runAsNonRoot: true
         seccompProfile: { type: RuntimeDefault }
       containers:
-        - name: night-shift
+        - name: devops-may-cry
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           ports:
             - { name: http, containerPort: 8080 }
@@ -45,20 +46,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift-burstable
+  name: devops-may-cry-burstable
   namespace: traffic-lab
   labels:
-    app: night-shift-burstable
+    app: devops-may-cry-burstable
     lab.boostmentor.dev/qos: burstable
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: night-shift-burstable
+      app: devops-may-cry-burstable
   template:
     metadata:
       labels:
-        app: night-shift-burstable
+        app: devops-may-cry-burstable
         lab.boostmentor.dev/qos: burstable
     spec:
       automountServiceAccountToken: false
@@ -66,7 +67,8 @@ spec:
         runAsNonRoot: true
         seccompProfile: { type: RuntimeDefault }
       containers:
-        - name: night-shift
+        - name: devops-may-cry
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           ports:
             - { name: http, containerPort: 8080 }
@@ -83,20 +85,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift-besteffort
+  name: devops-may-cry-besteffort
   namespace: traffic-lab
   labels:
-    app: night-shift-besteffort
+    app: devops-may-cry-besteffort
     lab.boostmentor.dev/qos: best-effort
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: night-shift-besteffort
+      app: devops-may-cry-besteffort
   template:
     metadata:
       labels:
-        app: night-shift-besteffort
+        app: devops-may-cry-besteffort
         lab.boostmentor.dev/qos: best-effort
     spec:
       automountServiceAccountToken: false
@@ -104,7 +106,8 @@ spec:
         runAsNonRoot: true
         seccompProfile: { type: RuntimeDefault }
       containers:
-        - name: night-shift
+        - name: devops-may-cry
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           ports:
             - { name: http, containerPort: 8080 }

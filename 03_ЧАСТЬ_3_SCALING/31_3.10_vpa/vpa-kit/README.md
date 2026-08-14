@@ -11,7 +11,7 @@
 kubectl apply -f ../vpa_lab.yaml
 ```
 
-В объекте NIGHT SHIFT стоит `updateMode: Off`: мы собираем рекомендацию и не
+В объекте DEVOPS MAY CRY стоит `updateMode: Off`: мы собираем рекомендацию и не
 разрешаем VPA самовольно пересоздавать pod во время записи. В production режим
 выбирают с учётом PDB, disruption budget, startup latency и поддержки in-place
 resize конкретной версией Kubernetes. VPA зависит от Metrics API; зелёный CRD

@@ -11,13 +11,13 @@ cd "$LAB_DIR"
 
 # MetalLB был реальной практикой части 1. Перед отдельным внешним HA-этажом
 # убираем его Service/data plane, чтобы не выдавать две точки входа за одну.
-kubectl --context kubespray -n traffic-lab delete svc night-shift-metallb --ignore-not-found
+kubectl --context kubespray -n traffic-lab delete svc devops-may-cry-metallb --ignore-not-found
 helm --kube-context kubespray uninstall metallb -n metallb-system --ignore-not-found
 
-kubectl --context kubespray apply -k "$REPO_ROOT/00_NIGHT_SHIFT_APP/k8s/base"
-kubectl --context kubespray -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl --context kubespray apply -k "$REPO_ROOT/00_DEVOPS_MAY_CRY_APP/k8s/base"
+kubectl --context kubespray -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
 kubectl --context kubespray apply -f ./lb-demo.yaml
-kubectl --context kubespray -n traffic-lab get svc night-shift-ha-nodeport -o wide
+kubectl --context kubespray -n traffic-lab get svc devops-may-cry-ha-nodeport -o wide
 
 HA_DIR="$LAB_DIR/ha"
 cd "$HA_DIR"

@@ -6,13 +6,14 @@
 #   echo "<IP> ansible_user=<terraform output ssh_user>" >> vm_inventory.ini
 #   ansible -i vm_inventory.ini all -m ping                 # pong с ЖИВОЙ машины
 #   ansible-playbook -i vm_inventory.ini site_vm.yml        # runtime + systemd unit
-#   open http://<IP>/                                       # реальная NIGHT SHIFT UI
+#   open http://<IP>/                                       # реальная DEVOPS MAY CRY UI
 #   ansible-playbook -i vm_inventory.ini site_vm.yml        # changed=0 — идемпотентность
 - name: Настроить свежую ВМ
   hosts: demo_vm
   become: true
   vars:
-    night_shift_image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
+    # образ собран под историческим именем night-shift — это тот же сервис
+    devops_may_cry_image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
   tasks:
     - name: Имя машины — говорящее
       ansible.builtin.hostname:
@@ -26,37 +27,37 @@
         state: present
         update_cache: true
 
-    - name: NIGHT SHIFT управляется systemd, а не ручным docker run
+    - name: DEVOPS MAY CRY управляется systemd, а не ручным docker run
       ansible.builtin.copy:
-        dest: /etc/systemd/system/night-shift.service
+        dest: /etc/systemd/system/devops-may-cry.service
         mode: "0644"
         content: |
           [Unit]
-          Description=NIGHT SHIFT demo API
+          Description=DEVOPS MAY CRY demo API
           Wants=network-online.target docker.service
           After=network-online.target docker.service
 
           [Service]
           Restart=always
           RestartSec=3
-          ExecStartPre=-/usr/bin/docker rm -f night-shift
-          ExecStartPre=/usr/bin/docker pull {{ night_shift_image }}
-          ExecStart=/usr/bin/docker run --rm --name night-shift --read-only --tmpfs /tmp:size=16m --cap-drop=ALL --security-opt=no-new-privileges:true -p 80:8080 {{ night_shift_image }}
-          ExecStop=/usr/bin/docker stop -t 25 night-shift
+          ExecStartPre=-/usr/bin/docker rm -f devops-may-cry
+          ExecStartPre=/usr/bin/docker pull {{ devops_may_cry_image }}
+          ExecStart=/usr/bin/docker run --rm --name devops-may-cry --read-only --tmpfs /tmp:size=16m --cap-drop=ALL --security-opt=no-new-privileges:true -p 80:8080 {{ devops_may_cry_image }}
+          ExecStop=/usr/bin/docker stop -t 25 devops-may-cry
           TimeoutStopSec=30
 
           [Install]
           WantedBy=multi-user.target
       notify:
         - Перечитать systemd
-        - Перезапустить NIGHT SHIFT
+        - Перезапустить DEVOPS MAY CRY
 
     - name: Применить новый unit до проверки сервиса
       ansible.builtin.meta: flush_handlers
 
-    - name: NIGHT SHIFT запущен и включён в автозагрузку
+    - name: DEVOPS MAY CRY запущен и включён в автозагрузку
       ansible.builtin.systemd_service:
-        name: night-shift
+        name: devops-may-cry
         state: started
         enabled: true
 
@@ -75,7 +76,7 @@
       ansible.builtin.systemd_service:
         daemon_reload: true
 
-    - name: Перезапустить NIGHT SHIFT
+    - name: Перезапустить DEVOPS MAY CRY
       ansible.builtin.systemd_service:
-        name: night-shift
+        name: devops-may-cry
         state: restarted

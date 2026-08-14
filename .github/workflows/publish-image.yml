@@ -1,4 +1,4 @@
-name: Publish NIGHT SHIFT image
+name: Publish DEVOPS MAY CRY image
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
-          images: ghcr.io/${{ github.repository_owner }}/night-shift
+          images: ghcr.io/${{ github.repository_owner }}/devops-may-cry
           tags: |
             type=semver,pattern={{version}}
             type=sha,prefix=sha-
@@ -37,7 +37,7 @@ jobs:
       - name: Build and publish multi-arch image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
-          context: 00_NIGHT_SHIFT_APP
+          context: 00_DEVOPS_MAY_CRY_APP
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}

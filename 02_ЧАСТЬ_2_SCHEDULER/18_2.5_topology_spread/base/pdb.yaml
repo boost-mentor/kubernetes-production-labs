@@ -1,10 +1,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: night-shift
+  name: devops-may-cry
   namespace: traffic-lab
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: night-shift
+      app: devops-may-cry

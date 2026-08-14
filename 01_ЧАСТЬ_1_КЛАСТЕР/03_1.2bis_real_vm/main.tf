@@ -60,7 +60,7 @@ resource "openstack_compute_keypair_v2" "demo" {
 
 resource "openstack_networking_secgroup_v2" "demo" {
   name        = "video2-recording"
-  description = "Recording demo: SSH and NIGHT SHIFT only from one trusted CIDR"
+  description = "Recording demo: SSH and DEVOPS MAY CRY only from one trusted CIDR"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "ssh" {

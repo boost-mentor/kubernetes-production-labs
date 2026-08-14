@@ -28,7 +28,7 @@ ansible-playbook -i inventory.ini playbook.yml
 # → RUNNING HANDLER [Разослать дежурным новый тариф] ... changed: [localhost]
 # → PLAY RECAP: localhost : ok=6  changed=4  unreachable=0  failed=0  skipped=0  rescued=0  ignored=0
 cat /tmp/night_office/prays.txt
-# → NIGHT SHIFT · ПРАЙС НА НОЧНЫЕ ВЫЗОВЫ
+# → DEVOPS MAY CRY · ПРАЙС НА НОЧНЫЕ ВЫЗОВЫ
 # → 401 · бабайка под кроватью       3000 ₽
 # → 402 · шорохи на чердаке          2500 ₽
 # → 403 · свет мигает в подъезде     1500 ₽

@@ -1,22 +1,22 @@
-# The same production-oriented NIGHT SHIFT binary demonstrates both outcomes.
+# The same production-oriented DEVOPS MAY CRY binary demonstrates both outcomes.
 # Memory above a cgroup limit is OOMKilled; CPU above a limit is throttled.
 # Self-load endpoints are explicitly enabled only in this isolated lab.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift-oom
+  name: devops-may-cry-oom
   namespace: traffic-lab
   labels:
-    app: night-shift-oom
+    app: devops-may-cry-oom
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: night-shift-oom
+      app: devops-may-cry-oom
   template:
     metadata:
       labels:
-        app: night-shift-oom
+        app: devops-may-cry-oom
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 15
@@ -25,7 +25,8 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: night-shift
+        - name: devops-may-cry
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           env:
             - name: LAB_ENDPOINTS_ENABLED
@@ -56,19 +57,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: night-shift-throttled
+  name: devops-may-cry-throttled
   namespace: traffic-lab
   labels:
-    app: night-shift-throttled
+    app: devops-may-cry-throttled
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: night-shift-throttled
+      app: devops-may-cry-throttled
   template:
     metadata:
       labels:
-        app: night-shift-throttled
+        app: devops-may-cry-throttled
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 15
@@ -77,7 +78,8 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: night-shift
+        - name: devops-may-cry
+          # образ собран под историческим именем night-shift — это тот же сервис
           image: ghcr.io/boost-mentor/night-shift@sha256:1979cadfe28a68cfc34a9460bb757397307c27bcc8ea19bc02ede46c0ee9fd5c
           env:
             - name: LAB_ENDPOINTS_ENABLED

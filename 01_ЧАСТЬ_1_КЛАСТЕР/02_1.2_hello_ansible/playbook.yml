@@ -1,4 +1,4 @@
-# ХЕЛЛО-ПЛЕЙБУК «ДИСПЕТЧЕРСКАЯ NIGHT SHIFT» — анатомия + идемпотентность + handlers.
+# ХЕЛЛО-ПЛЕЙБУК «ДИСПЕТЧЕРСКАЯ DEVOPS MAY CRY» — анатомия + идемпотентность + handlers.
 #
 # ЗАПУСК (в кадре):
 #   rm -rf /tmp/night_office                          # старт с чистого листа, иначе changed=0
@@ -9,7 +9,7 @@
 #   ansible-playbook -i inventory.ini playbook.yml    # → ok=6 changed=2, handler СНОВА сработал
 #
 # Ни одной задаче не нужен become/sudo — всё пишем в /tmp.
-- name: Диспетчерская NIGHT SHIFT заступает на смену
+- name: Диспетчерская DEVOPS MAY CRY заступает на смену
   hosts: night_office
   gather_facts: false
 
@@ -32,7 +32,7 @@
         dest: "{{ office }}/vyveska.txt"
         mode: "0644"
         content: |
-          NIGHT SHIFT · ночная аварийная служба
+          DEVOPS MAY CRY · ночная аварийная служба
           Заявки принимаем круглосуточно, выезжаем по темноте.
           Если оно урчит — это котёл. Если урчит и зовёт по имени — это к нам.
           Кофе за счёт заведения. Пицца — дежурным.
@@ -43,7 +43,7 @@
         dest: "{{ office }}/prays.txt"
         mode: "0644"
         content: |
-          NIGHT SHIFT · ПРАЙС НА НОЧНЫЕ ВЫЗОВЫ
+          DEVOPS MAY CRY · ПРАЙС НА НОЧНЫЕ ВЫЗОВЫ
           {% for call, price in call_prices.items() %}
           {{ "%-32s" | format(call) }} {{ price }} ₽
           {% endfor %}

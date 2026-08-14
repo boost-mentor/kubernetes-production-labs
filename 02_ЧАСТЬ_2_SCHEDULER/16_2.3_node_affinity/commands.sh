@@ -9,14 +9,14 @@ LAB_DIR="$REPO_ROOT/02_ЧАСТЬ_2_SCHEDULER/16_2.3_node_affinity"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl -n traffic-lab get pod -l app=night-shift-postgres -o wide
+kubectl -n traffic-lab get pod -l app=devops-may-cry-postgres -o wide
 kubectl label node node3 workload.boostmentor.dev/tier-
-kubectl -n traffic-lab get pod -l app=night-shift-postgres -o wide
+kubectl -n traffic-lab get pod -l app=devops-may-cry-postgres -o wide
 # → уже запущенный PostgreSQL остался на node3
 
 
-kubectl -n traffic-lab delete pod -l app=night-shift-postgres
-kubectl -n traffic-lab get pod -l app=night-shift-postgres -w
+kubectl -n traffic-lab delete pod -l app=devops-may-cry-postgres
+kubectl -n traffic-lab get pod -l app=devops-may-cry-postgres -w
 # → новый pod Pending: required affinity больше невыполнима (Ctrl+C)
 kubectl label node node3 workload.boostmentor.dev/tier=database --overwrite
-kubectl -n traffic-lab rollout status deploy/night-shift-postgres --timeout=120s
+kubectl -n traffic-lab rollout status deploy/devops-may-cry-postgres --timeout=120s

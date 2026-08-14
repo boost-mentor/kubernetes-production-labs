@@ -9,8 +9,8 @@ LAB_DIR="$REPO_ROOT/04_ЧАСТЬ_4_TRAFFIC/42_4.10_broken_service"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl apply -f ./night_shift.yaml
-kubectl -n traffic-lab rollout status deploy/night-shift --timeout=180s
+kubectl apply -f ./devops_may_cry.yaml
+kubectl -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
 kubectl apply -f ./debug-client.yaml
 kubectl -n traffic-lab wait --for=condition=Ready pod/client --timeout=180s
 
@@ -18,7 +18,7 @@ cat <<'EOF' | kubectl apply -f -
 apiVersion: v1
 kind: Service
 metadata:
-  name: night-shift-broken
+  name: devops-may-cry-broken
   namespace: traffic-lab
 spec:
   selector:
@@ -29,15 +29,15 @@ spec:
 EOF
 
 kubectl -n traffic-lab exec client --   curl -m3 -s -o /dev/null -w '%{http_code}
-' night-shift-broken || true
-kubectl -n traffic-lab exec client -- dig +search +short night-shift-broken
-kubectl -n traffic-lab get endpointslice   -l kubernetes.io/service-name=night-shift-broken -o wide
+' devops-may-cry-broken || true
+kubectl -n traffic-lab exec client -- dig +search +short devops-may-cry-broken
+kubectl -n traffic-lab get endpointslice   -l kubernetes.io/service-name=devops-may-cry-broken -o wide
 # DNS и ClusterIP есть, но endpoints пусты: это не поломка Go-приложения.
-kubectl -n traffic-lab describe svc night-shift-broken | grep Selector
+kubectl -n traffic-lab describe svc devops-may-cry-broken | grep Selector
 kubectl -n traffic-lab get pods --show-labels
 
-kubectl -n traffic-lab patch svc night-shift-broken   -p '{"spec":{"selector":{"app":"night-shift"}}}'
-kubectl -n traffic-lab get endpointslice   -l kubernetes.io/service-name=night-shift-broken -o wide
+kubectl -n traffic-lab patch svc devops-may-cry-broken   -p '{"spec":{"selector":{"app":"devops-may-cry"}}}'
+kubectl -n traffic-lab get endpointslice   -l kubernetes.io/service-name=devops-may-cry-broken -o wide
 kubectl -n traffic-lab exec client --   curl -fsS -o /dev/null -w '%{http_code}
-' night-shift-broken
-kubectl -n traffic-lab delete svc night-shift-broken
+' devops-may-cry-broken
+kubectl -n traffic-lab delete svc devops-may-cry-broken

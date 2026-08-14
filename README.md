@@ -1,10 +1,10 @@
 # Kubernetes production labs — Video 2
 
-Чистый recording repository: отдельное Go-приложение NIGHT SHIFT и 45
+Чистый recording repository: отдельное Go-приложение DEVOPS MAY CRY и 45
 последовательных лабораторных по Terraform, Ansible/Kubespray, scheduler,
 ресурсам, scaling и пути трафика.
 
-- `00_NIGHT_SHIFT_APP` — Go, tests, Docker, Compose + PostgreSQL, Kustomize;
+- `00_DEVOPS_MAY_CRY_APP` — Go, tests, Docker, Compose + PostgreSQL, Kustomize;
 - `01_ЧАСТЬ_1_КЛАСТЕР` — IaC, Kubespray, managed/self-managed, MetalLB;
 - `02_ЧАСТЬ_2_SCHEDULER` — taints, affinity, spread, Pending;
 - `03_ЧАСТЬ_3_SCALING` — requests/limits, OOM, HPA/VPA/autoscaler;

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ЛАБА 1.1 · hello-terraform: смена в диспетчерской NIGHT SHIFT
+# ЛАБА 1.1 · hello-terraform: смена в диспетчерской DEVOPS MAY CRY
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
 # Первый блок работает и при копировании из VS Code в новый терминал:
@@ -37,7 +37,7 @@ terraform apply       # напечатать ровно yes (буква y НЕ �
 # →   "./svodka.txt",
 # → ]
 cat zhurnal.txt
-# → NIGHT SHIFT · ЖУРНАЛ ЗАЯВОК      смена 22:00-06:00
+# → DEVOPS MAY CRY · ЖУРНАЛ ЗАЯВОК      смена 22:00-06:00
 # → На телефоне: дежурный
 # → ----------------------------------------------------------
 # → 401  ул. Тихая, 12   бабайка под кроватью   ночной тариф x2
@@ -47,7 +47,7 @@ cat zhurnal.txt
 # → ----------------------------------------------------------
 # → Правки в журнале руками не считаются. Считается то, что в plan.
 cat svodka.txt
-# → NIGHT SHIFT · СВОДКА СМЕНЫ
+# → DEVOPS MAY CRY · СВОДКА СМЕНЫ
 # → Журнал: ./zhurnal.txt, 488 символов
 # → Принято 4 · закрыто 3 · висит заявка 404
 # → Смену сдал: дежурный. Пицца дежурным — по факту закрытия 404.
@@ -72,7 +72,7 @@ terraform plan
 # → Plan: 1 to add, 0 to change, 0 to destroy.
 terraform apply       # yes
 # → Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
-head -2 zhurnal.txt   # → снова NIGHT SHIFT · ЖУРНАЛ ЗАЯВОК… / На телефоне: дежурный
+head -2 zhurnal.txt   # → снова DEVOPS MAY CRY · ЖУРНАЛ ЗАЯВОК… / На телефоне: дежурный
 
 
 terraform apply -var 'dispatcher=Витёк'     # yes

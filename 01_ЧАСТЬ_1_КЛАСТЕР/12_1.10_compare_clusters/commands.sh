@@ -9,9 +9,9 @@ LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/12_1.10_compare_clusters"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl --context yc-managed apply -f ./night_shift.yaml
-kubectl --context yc-managed -n traffic-lab rollout status deploy/night-shift --timeout=180s
-kubectl --context yc-managed -n traffic-lab patch svc night-shift --type merge -p '{"spec":{"type":"LoadBalancer"}}'
+kubectl --context yc-managed apply -f ./devops_may_cry.yaml
+kubectl --context yc-managed -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
+kubectl --context yc-managed -n traffic-lab patch svc devops-may-cry --type merge -p '{"spec":{"type":"LoadBalancer"}}'
 
 # 1. Где control-plane?
 kubectl --context kubespray get nodes
@@ -26,8 +26,8 @@ read -r -p "public/floating IP node1: " NODE1_PUBLIC_IP
 ssh "root@$NODE1_PUBLIC_IP" 'sudo kubeadm certs check-expiration | head -12'
 
 # 4. Кто даёт внешний адрес Service?
-kubectl --context kubespray -n traffic-lab get svc night-shift-metallb -o wide
-kubectl --context yc-managed -n traffic-lab get svc night-shift -w
+kubectl --context kubespray -n traffic-lab get svc devops-may-cry-metallb -o wide
+kubectl --context yc-managed -n traffic-lab get svc devops-may-cry -w
 
 # 5. Что видно в control plane облака?
 yc managed-kubernetes cluster list

@@ -11,8 +11,8 @@ cd "$LAB_DIR"
 
 kubectl create namespace traffic-lab --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f ./requests_limits.yaml
-kubectl -n traffic-lab rollout status deploy/night-shift-burstable --timeout=180s
-POD=$(kubectl -n traffic-lab get pod -l app=night-shift-burstable -o jsonpath='{.items[0].metadata.name}')
+kubectl -n traffic-lab rollout status deploy/devops-may-cry-burstable --timeout=180s
+POD=$(kubectl -n traffic-lab get pod -l app=devops-may-cry-burstable -o jsonpath='{.items[0].metadata.name}')
 NODE=$(kubectl -n traffic-lab get pod "$POD" -o jsonpath='{.spec.nodeName}')
 kubectl -n traffic-lab get pod "$POD" -o custom-columns='NAME:.metadata.name,QOS:.status.qosClass,REQUEST_CPU:.spec.containers[0].resources.requests.cpu,LIMIT_CPU:.spec.containers[0].resources.limits.cpu,REQUEST_MEM:.spec.containers[0].resources.requests.memory,LIMIT_MEM:.spec.containers[0].resources.limits.memory'
 kubectl describe node "$NODE" | sed -n '/Allocated resources:/,/Events:/p'

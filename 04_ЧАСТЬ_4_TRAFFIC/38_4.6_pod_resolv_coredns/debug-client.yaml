@@ -5,7 +5,7 @@ metadata:
   namespace: traffic-lab
   labels:
     app.kubernetes.io/name: network-debug-client
-    app.kubernetes.io/part-of: night-shift
+    app.kubernetes.io/part-of: devops-may-cry
 spec:
   restartPolicy: Always
   automountServiceAccountToken: false
