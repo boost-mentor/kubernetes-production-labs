@@ -54,9 +54,12 @@ node3 ansible_host=$NODE3_PUBLIC ip=$NODE3_PRIVATE access_ip=$NODE3_PRIVATE
 
 [kube_control_plane]
 node1
+node2
 
 [etcd]
 node1
+node2
+node3
 
 [kube_node]
 node2

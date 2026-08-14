@@ -1,3 +1,28 @@
+# main.tf — точка входа: пины версий, провайдер, переменные (структура по мотивам
+# практикума: main / network / service-accounts / kubernetes; секреты НЕ в файлах).
+# Пины версий. Без них завтрашний apply может дать другой результат.
+# Проверено 29.07.2026: последний Terraform 1.15.8, YC provider 0.220.0.
+# required_version намеренно диапазоном: локально может стоять 1.13.x — конфиг
+# совместим. Провайдер запинен ЖЁСТКО: без этого завтрашний init принесёт другую
+# версию и plan может отличаться.
+terraform {
+  required_version = ">= 1.9.0, < 2.0.0"
+
+  required_providers {
+    yandex = {
+      source  = "yandex-cloud/yandex"
+      version = "0.219.0"
+    }
+  }
+}
+# Аутентификация — через переменные окружения, НЕ через переменную с токеном в коде.
+#   export YC_TOKEN=$(yc iam create-token)
+#   export YC_CLOUD_ID=$(yc config get cloud-id)
+#   export YC_FOLDER_ID=$(yc config get folder-id)
+# Так токен не попадёт ни в .tf, ни в state, ни в git.
+provider "yandex" {
+  zone = var.zone
+}
 variable "zone" {
   type    = string
   default = "ru-central1-a"

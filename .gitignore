@@ -12,3 +12,4 @@
 **/inventory/video2/inventory.ini
 **/ha/inventory.ini
 **/.failed-active-host
+private.auto.tfvars
