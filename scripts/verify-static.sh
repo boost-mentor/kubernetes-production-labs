@@ -2,6 +2,7 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+cd "$repo_root"
 
 command_count=$(find "$repo_root" -type f -name commands.sh | wc -l | tr -d ' ')
 [[ $command_count == 45 ]] || {
