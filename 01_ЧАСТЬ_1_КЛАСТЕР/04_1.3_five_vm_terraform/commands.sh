@@ -9,23 +9,22 @@ LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/04_1.3_five_vm_terraform"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-cd "$LAB_DIR/terraform"
-cp terraform.tfvars.example terraform.tfvars
+cd "$REPO_ROOT/infra/self-managed/terraform"
+test -f terraform.tfvars || cp terraform.tfvars.example terraform.tfvars
 # Перед командой укажи свой public IP /32 и SSH public key.
 terraform fmt -check -recursive
 terraform init
 terraform validate
-terraform plan -out=video2.tfplan
-terraform apply video2.tfplan
+terraform plan
+terraform apply
 terraform output nodes
-terraform output -raw kubespray_inventory > /tmp/video2-kubespray.ini
-cat /tmp/video2-kubespray.ini
+mkdir -p "$REPO_ROOT/kubespray/inventory/video2/group_vars/all"
+terraform output -raw kubespray_inventory > "$REPO_ROOT/kubespray/inventory/video2/inventory.ini"
+terraform output -raw kubespray_all_yml > "$REPO_ROOT/kubespray/inventory/video2/group_vars/all/all.yml"
+terraform output -raw external_ha_inventory > "$REPO_ROOT/ansible/external-ha/inventory.ini"
+sed -n '1,120p' "$REPO_ROOT/kubespray/inventory/video2/inventory.ini"
+sed -n '1,80p' "$REPO_ROOT/kubespray/inventory/video2/group_vars/all/all.yml"
+sed -n '1,120p' "$REPO_ROOT/ansible/external-ha/inventory.ini"
 yc compute instance list
-# У Terraform-VM cloud user задаётся переменной (по умолчанию ubuntu).
-# У BoostMentor lesson-VM ниже — root. Это два стенда одинаковой формы,
-# но inventory нельзя смешивать после destroy демонстрационного стенда.
-
-# Это временная демонстрация «тот же стенд кодом». Основная лаба уже живёт
-# в BoostMentor, поэтому после сравнения платные VM удаляем.
-terraform plan -destroy -out=destroy.tfplan
-terraform apply destroy.tfplan
+# Эти пять VM не уничтожаем: на node1-node3 дальше идёт Kubespray,
+# а lb1/lb2 используются в сцене внешнего HA. Destroy — только после REC.

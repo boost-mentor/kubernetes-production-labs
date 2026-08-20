@@ -64,7 +64,7 @@ terraform output
 terraform output -raw on_duty # → дежурный   ← без кавычек И без перевода строки: так значение забирает следующий инструмент
 
 
-echo "тут никого не было, честно" > zhurnal.txt
+echo "дежурный поправил журнал вручную" > zhurnal.txt
 terraform plan
 # → local_file.zhurnal: Refreshing state... [id=44281110112ea03dfbe73fb4a7fc6c8d70188950]
 # → local_file.svodka:  Refreshing state... [id=32a9f4be2d0c232be451c4a723a677bad25874da]

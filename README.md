@@ -4,20 +4,35 @@
 последовательных лабораторных по Terraform, Ansible/Kubespray, scheduler,
 ресурсам, scaling и пути трафика.
 
-- `00_DEVOPS_MAY_CRY_APP` — Go, tests, Docker, Compose + PostgreSQL, Kustomize;
+- `apps/devops-may-cry` — Go, tests, Docker, Compose + PostgreSQL, Kustomize;
+- `infra` — отдельные self-managed и managed Terraform roots;
+- `kubespray` — наш inventory/group_vars и зафиксированные версии;
+- `ansible/external-ha` — роли HAProxy/keepalived и лабораторный VXLAN/VIP;
+- `kubernetes/devops-may-cry` — канонические workload-манифесты;
 - `01_ЧАСТЬ_1_КЛАСТЕР` — IaC, Kubespray, managed/self-managed, MetalLB;
 - `02_ЧАСТЬ_2_SCHEDULER` — taints, affinity, spread, Pending;
 - `03_ЧАСТЬ_3_SCALING` — requests/limits, OOM, HPA/VPA/autoscaler;
 - `04_ЧАСТЬ_4_TRAFFIC` — TCP/DNS/Service/EndpointSlice и внешний HA.
 
+Запись начинается с
+[`recording/MASTER_RECORDING_PLAN.md`](recording/MASTER_RECORDING_PLAN.md).
+Правки доски для части 1 собраны в
+[`recording/BOARD_PART1_GATE.md`](recording/BOARD_PART1_GATE.md).
+
 В каждой лабораторной `commands.sh` — не исполняемый setup-скрипт, а блоки
 команд для копирования по одному во время записи. Секреты, private keys,
 runtime inventory, Terraform state/plan/tfvars в git не входят.
 
-Два handoff намеренно сохраняют runtime-state между соседними папками:
-`06 -> 07` использует один Kubespray inventory, а `43 -> 44 -> 45` — один
-HA inventory и маркер активного балансировщика. Команды указывают эти пути
-явно; дублированных расходящихся копий нет.
+Runtime-state намеренно сохраняется между соседними сценами. В записи один
+обычный урок BoostMentor создаёт пять VM; их SSH-адреса лежат только в локальном
+`recording/.recording.env`. Прямые команды собирают из них один Kubespray
+inventory и один HA inventory. Отдельный Terraform root показывает
+эквивалентный пяти-VM стенд, его outputs и управляемый destroy, но не подменяет
+рабочую лабораторию. Маркер остановленного LB лежит только в
+`recording/backstage`, а не в учебном коде. Дублированных расходящихся копий нет.
+
+Обычный вход в лабораторию:
+`https://boostmentor.ru/dashboard/courses/devops-school/lesson/g8-project-cluster-lab1`.
 
 ```bash
 git clone https://github.com/boost-mentor/kubernetes-production-labs.git

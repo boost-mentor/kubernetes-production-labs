@@ -1,0 +1,3 @@
+*.pdf binary
+teleprompter/*.md whitespace=-trailing-space
+teleprompter/source/*.md whitespace=-trailing-space

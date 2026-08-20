@@ -11,8 +11,10 @@
   immutable digest;
 - Terraform разделён на root module, typed child module, variables, outputs,
   security groups и пример remote state с locking;
-- Kubespray pin'ится по tag, inventory генерируется из facts, TLS-проверка не
-  отключается, `strictARP` задаётся до сборки кластера;
+- Kubespray pin'ится по tag; SSH-адреса рабочего стенда берутся из локального
+  recording env после запуска обычной лаборатории, private IP снимаются Ansible facts;
+  Terraform outputs служат IaC-reference того же пяти-VM стенда; TLS-проверка не отключается,
+  `strictARP` задаётся до сборки кластера;
 - Ansible разделён на inventory, roles, templates и handlers; failover должен
   закончиться проверкой VIP, backends и HTTP, а не одним `changed=...`;
 - workload работает non-root, без service-account token, с probes, resources,
@@ -20,8 +22,9 @@
 
 ## Упрощения стенда
 
-- один control-plane/etcd и два worker — это учебный кластер. Production HA
-  обычно требует минимум три control-plane/etcd в независимых failure domains;
+- два control-plane, три etcd и два worker (node2 одновременно control-plane и
+  worker) — это компактный учебный кластер. Production HA обычно требует минимум
+  три control-plane в независимых failure domains и осознанную etcd-топологию;
 - public/floating IP на каждой VM удобен для записи. В production nodes обычно
   private, доступ идёт через bastion/runner, egress — через NAT, security groups
   разделены для LB, control-plane и workers;

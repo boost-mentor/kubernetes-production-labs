@@ -4,6 +4,9 @@
 # v2.31.0, а не из случайного `kubectl apply` по ветке main.
 metrics_server_enabled: true
 
-# В production не отключаем проверку kubelet TLS. Если metrics-server не может
-# проверить serving certificate, диагностируем SAN/CSR и исправляем сертификат.
-metrics_server_kubelet_insecure_tls: false
+# Ограничение учебного стенда: Kubespray v2.31.0 одним флагом
+# отключает и проверку kubelet serving certificate, и проверку TLS
+# агрегированного APIService. Без этого компромисса текущие self-signed
+# сертификаты лабы не пройдут проверку. В production это не копируем:
+# выдаём CA-signed kubelet serving certificates и настраиваем caBundle APIService.
+metrics_server_kubelet_insecure_tls: true

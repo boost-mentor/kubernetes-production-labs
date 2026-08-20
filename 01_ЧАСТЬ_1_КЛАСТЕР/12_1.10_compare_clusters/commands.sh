@@ -9,7 +9,7 @@ LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/12_1.10_compare_clusters"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl --context yc-managed apply -f ./devops_may_cry.yaml
+kubectl --context yc-managed apply -k "$REPO_ROOT/kubernetes/devops-may-cry/base"
 kubectl --context yc-managed -n traffic-lab rollout status deploy/devops-may-cry --timeout=180s
 kubectl --context yc-managed -n traffic-lab patch svc devops-may-cry --type merge -p '{"spec":{"type":"LoadBalancer"}}'
 
@@ -33,3 +33,9 @@ kubectl --context yc-managed -n traffic-lab get svc devops-may-cry -w
 yc managed-kubernetes cluster list
 yc managed-kubernetes node-group list
 # В браузере рядом: self-managed 5 VM в уроке и managed cluster в Yandex UI.
+
+# 6. Как отличается доступ? Без --raw секреты замаскированы.
+kubectl config get-contexts
+kubectl config view --context yc-managed --minify -o yaml
+kubectl config view --context kubespray --minify -o yaml
+stat -f '%Sp %N' "$HOME/.kube/config"

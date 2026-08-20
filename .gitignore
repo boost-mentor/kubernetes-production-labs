@@ -8,8 +8,15 @@
 **/*.tfstate.*
 **/*.tfplan
 **/.vault_pass
-**/inventory/video2/
 **/inventory/video2/inventory.ini
-**/ha/inventory.ini
+**/inventory/video2/group_vars/all/all.yml
+**/inventory/video2/artifacts/
+**/inventory/video2/facts/
+**/inventory/video2/bootstrap.ini
+ansible/external-ha/inventory.ini
 **/.failed-active-host
+**/.vip-tunnel.pid
 private.auto.tfvars
+recording/.recording.env
+output/qa/
+output/pdf/*.html

@@ -9,18 +9,19 @@ LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/05_1.4_managed_cluster"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-cd "$LAB_DIR/terraform"
-cp terraform.tfvars.example terraform.tfvars
-# Заполни folder_id, service_account_id, public_key и разрешённые CIDR.
+cd "$REPO_ROOT/infra/managed/terraform"
+test -f private.auto.tfvars || cp private.auto.tfvars.example private.auto.tfvars
+# До REC укажи в private.auto.tfvars свой public IP /32.
 terraform fmt -check -recursive
 terraform init
 terraform validate
-terraform plan -out=managed.tfplan
-terraform apply managed.tfplan
+terraform plan
+terraform apply
 
 yc managed-kubernetes cluster list
 yc managed-kubernetes node-group list
-yc managed-kubernetes cluster get-credentials k8s-managed --external --force
+terraform output cidrs
+$(terraform output -raw get_credentials_command)
 kubectl config rename-context "$(kubectl config current-context)" yc-managed
 kubectl --context yc-managed get nodes -o wide
 # В браузере: Yandex Cloud -> Managed Service for Kubernetes -> Nodes.

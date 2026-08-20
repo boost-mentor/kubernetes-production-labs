@@ -2,20 +2,27 @@
 # ЛАБА 1.4-БИС · Подготовка трёх машин: то, из-за чего Kubespray падает на середине
 # Выполнять ПО БЛОКАМ во время лабораторной. Не запускать файл целиком.
 
-# Первый блок работает и при копировании из VS Code в новый терминал:
-# путь вычисляется от корня git clone, а не от случайного текущего каталога.
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/06_1.4bis_node_preflight"
-SOURCE_ROOT="$REPO_ROOT"
-cd "$LAB_DIR"
+KUBESPRAY_ROOT="$REPO_ROOT/kubespray"
+INV="$KUBESPRAY_ROOT/inventory/video2/inventory.ini"
+SSH_KEY="${VIDEO2_SSH_KEY:-$HOME/.ssh/id_ed25519}"
+source "$KUBESPRAY_ROOT/.venv/bin/activate"
 
-cd "$LAB_DIR/kubespray-kit"
-./bootstrap.sh
-read -r -p "public IP node1: " NODE1_PUBLIC_IP
-read -r -p "public IP node2: " NODE2_PUBLIC_IP
-read -r -p "public IP node3: " NODE3_PUBLIC_IP
-read -r -p "path to SSH key: " SSH_KEY_PATH
-./prepare-inventory.sh "$NODE1_PUBLIC_IP" "$NODE2_PUBLIC_IP" "$NODE3_PUBLIC_IP" "$SSH_KEY_PATH"
-./preflight.sh
-# Доказательство: public/floating IP нужен только для SSH, private IP сняты Ansible facts.
-sed -n '1,80p' inventory/video2/inventory.ini
+test -r "$SSH_KEY"
+chmod 600 "$SSH_KEY"
+test -f "$INV"
+test "$(git -C "$KUBESPRAY_ROOT/vendor/kubespray" describe --tags --exact-match)" = "$(cat "$KUBESPRAY_ROOT/VERSION")"
+ansible --version | head -5
+
+sed -n '1,160p' "$INV"
+ansible-inventory -i "$INV" --graph
+
+ansible -i "$INV" all --private-key "$SSH_KEY" -m ansible.builtin.ping
+ansible -i "$INV" all --private-key "$SSH_KEY" --become -m ansible.builtin.command -a whoami
+ansible -i "$INV" all --private-key "$SSH_KEY" --become -m ansible.builtin.shell \
+  -a 'test -z "$(swapon --show --noheadings)"; test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs; ip -4 route show default'
+
+# ansible_host — public/floating IP только для SSH.
+# ip/access_ip — private IP для трафика между VM.
+ansible -i "$INV" all --private-key "$SSH_KEY" -m ansible.builtin.setup \
+  -a 'filter=ansible_default_ipv4'

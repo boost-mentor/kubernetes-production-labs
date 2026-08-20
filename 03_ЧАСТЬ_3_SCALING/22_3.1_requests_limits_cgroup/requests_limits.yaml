@@ -3,7 +3,7 @@
 # we secretly switched applications.
 #
 # These variants are intentionally deployed only for the resource lab. The
-# production baseline is apps/devops-may-cry/k8s/base/deployment.yaml.
+# production baseline is kubernetes/devops-may-cry/base/deployment.yaml.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

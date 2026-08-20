@@ -9,15 +9,32 @@ LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/09_1.7_cidr_to_node"
 SOURCE_ROOT="$REPO_ROOT"
 cd "$LAB_DIR"
 
-kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.podCIDR}{"\n"}{end}'
-# → node1  10.233.64.0/24
-#   node2  10.233.65.0/24
-#   node3  10.233.66.0/24
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LAB_DIR="$REPO_ROOT/01_ЧАСТЬ_1_КЛАСТЕР/09_1.7_cidr_to_node"
+INV="$REPO_ROOT/kubespray/inventory/video2/inventory.ini"
+SSH_KEY="${VIDEO2_SSH_KEY:-$HOME/.ssh/id_ed25519}"
 
+kubectl --context kubespray get nodes \
+  -o custom-columns='NODE:.metadata.name,INTERNAL-IP:.status.addresses[?(@.type=="InternalIP")].address,POD-CIDR:.spec.podCIDR'
+# Node.spec.podCIDR и Calico IPAM block — не одно и то же.
+kubectl --context kubespray get ippools.crd.projectcalico.org -o yaml | \
+  grep -E 'cidr:|blockSize:|ipipMode:|vxlanMode:'
+kubectl --context kubespray get blockaffinities.crd.projectcalico.org \
+  -o custom-columns='NODE:.spec.node,CIDR:.spec.cidr,STATE:.spec.state'
 
-kubectl get pods -A -o wide | head -15
-# → сверь: третий октет IP пода = кусок его ноды
+kubectl --context kubespray apply -f "$LAB_DIR/calico-proof.yaml"
+kubectl --context kubespray -n network-proof wait --for=condition=Ready pod --all --timeout=120s
+kubectl --context kubespray -n network-proof get pods -o wide
 
+POD_A_IP="$(kubectl --context kubespray -n network-proof get pod calico-a -o jsonpath='{.status.podIP}')"
+POD_B_IP="$(kubectl --context kubespray -n network-proof get pod calico-b -o jsonpath='{.status.podIP}')"
+kubectl --context kubespray -n network-proof exec calico-a -- ip address show eth0
+kubectl --context kubespray -n network-proof exec calico-a -- ping -c 3 "$POD_B_IP"
 
-kubectl get svc kubernetes            # → ClusterIP 10.233.0.1 — ПЕРВЫЙ адрес Service CIDR
-kubectl -n kube-system get svc        # → CoreDNS тоже из 10.233.0.0/18 (обычно .3 или .10 — проверь!)
+source "$REPO_ROOT/kubespray/.venv/bin/activate"
+ansible -i "$INV" node2 --private-key "$SSH_KEY" --become -m ansible.builtin.shell \
+  -a "ip route get $POD_B_IP; ip -o link | grep cali | head; ip -d link show vxlan.calico || true"
+
+kubectl --context kubespray get svc kubernetes
+kubectl --context kubespray -n kube-system get svc kube-dns
+kubectl --context kubespray delete namespace network-proof --wait=true
